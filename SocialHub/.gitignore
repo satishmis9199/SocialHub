@@ -17,7 +17,7 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -45,6 +45,9 @@ logs/
 
 ### Local Spring Config ###
 src/main/resources/application-dev.properties
+
+### Uploads ###
+uploads/
 
 ### OS Files ###
 .DS_Store
