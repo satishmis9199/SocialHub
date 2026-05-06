@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SocialHub | Create Post</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+
+        * {
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background:#fafafa;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            display:flex;
+            justify-content:space-between;
+            padding:15px 40px;
+            background:white;
+            border-bottom:1px solid #ddd;
+        }
+
+        .logo {
+            font-size:22px;
+            font-weight:bold;
+        }
+
+        .back-btn {
+            cursor:pointer;
+            color:#555;
+        }
+
+        /* CONTAINER */
+        .container {
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:85vh;
+        }
+
+        /* CARD */
+        .card {
+            width:420px;
+            background:white;
+            padding:25px;
+            border-radius:15px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        /* UPLOAD BOX */
+        .upload-box {
+            border:2px dashed #ccc;
+            padding:20px;
+            text-align:center;
+            border-radius:10px;
+            cursor:pointer;
+            margin-bottom:15px;
+        }
+
+        .upload-box:hover {
+            border-color:#007bff;
+        }
+
+        input[type="file"] {
+            display:none;
+        }
+
+        /* PREVIEW */
+        .preview {
+            margin-top:10px;
+            text-align:center;
+        }
+
+        .preview img,
+        .preview video {
+            width:100%;
+            border-radius:10px;
+            margin-top:10px;
+        }
+
+        textarea {
+            width:100%;
+            padding:10px;
+            border-radius:8px;
+            border:1px solid #ddd;
+            resize:none;
+            height:80px;
+        }
+
+        button {
+            width:100%;
+            padding:12px;
+            border:none;
+            background:#007bff;
+            color:white;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:16px;
+            margin-top:10px;
+        }
+
+        button:hover {
+            background:#0056b3;
+        }
+
+        button:disabled {
+            background:gray;
+        }
+
+        .msg {
+            text-align:center;
+            margin-top:10px;
+            font-size:14px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="logo">SocialHub</div>
+    <div class="back-btn" onclick="goBack()">⬅ Back</div>
+</div>
+
+<div class="container">
+
+    <div class="card">
+
+        <h2>Create Post</h2>
+
+        <!-- Upload box -->
+        <div class="upload-box" onclick="document.getElementById('file').click()">
+            Click to upload image/video
+        </div>
+
+        <input type="file" id="file" accept="image/*,video/*">
+
+        <!-- Preview -->
+        <div class="preview" id="preview"></div>
+
+        <textarea id="caption" placeholder="Write a caption..."></textarea>
+
+        <button id="btn" onclick="createPost()">Upload</button>
+
+        <div class="msg" id="msg"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+    function goBack(){
+        window.location.href = "/user/dashboard";
+    }
+
+    /* PREVIEW */
+    document.getElementById("file").addEventListener("change", function(){
+
+        const file = this.files[0];
+        const preview = document.getElementById("preview");
+
+        preview.innerHTML = "";
+
+        if(!file) return;
+
+        const url = URL.createObjectURL(file);
+
+        if(file.type.startsWith("image")){
+            preview.innerHTML = `<img src="${url}">`;
+        } else {
+            preview.innerHTML = `<video src="${url}" controls></video>`;
+        }
+    });
+
+
+    /* CREATE POST */
+    async function createPost(){
+
+        let file = document.getElementById("file").files[0];
+        let caption = document.getElementById("caption").value;
+        let btn = document.getElementById("btn");
+        let msg = document.getElementById("msg");
+
+        if(!file){
+            msg.innerText = "Please select a file";
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("files", file);   // 🔥 backend match
+        formData.append("caption", caption);
+
+        btn.disabled = true;
+        msg.innerText = "Uploading...";
+
+        try {
+
+            let res = await fetch("/user/post", {
+                method: "POST",
+                body: formData
+            });
+
+            if(res.ok){
+                msg.innerText = "Post uploaded successfully 🚀";
+
+                setTimeout(()=>{
+                    window.location.href = "/user/dashboard";
+                },1000);
+
+            } else {
+                msg.innerText = "Upload failed ❌";
+            }
+
+        } catch(err){
+            console.error(err);
+            msg.innerText = "Error occurred ❌";
+        }
+
+        btn.disabled = false;
+    }
+
+</script>
+
+</body>
+</html>

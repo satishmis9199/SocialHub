@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SocialHub Register</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 350px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 10px;
+            background: #db4437;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .divider {
+            margin: 10px 0;
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .login-box {
+            margin-top: 10px;
+            background: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        /* 🔥 MESSAGE BOX */
+        #messageBox {
+            display: block;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* SUCCESS */
+        .success {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* ERROR */
+        .error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+        <h2 class="logo">SocialHub</h2>
+        <p class="subtitle">Create your account</p>
+
+        <button class="google-btn" onclick="googleSignup()">
+            Continue with Google
+        </button>
+
+        <div class="divider">OR</div>
+
+        <form id="registerForm">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password">
+
+            <button type="submit" class="signup-btn">Sign Up</button>
+        </form>
+
+        <!-- ✅ FIXED -->
+        <span id="messageBox"></span>
+
+    </div>
+
+    <div class="login-box">
+        Already have an account?
+        <a href="/api/login"><b>Login</b></a>
+    </div>
+
+</div>
+
+<script>
+    let provider = "LOCAL";
+    let providerId = null;
+
+    // Google signup simulation
+    function googleSignup() {
+        provider = "GOOGLE";
+        providerId = "google_123456";
+
+        document.getElementById("email").value = "googleuser@gmail.com";
+        document.getElementById("password").value = "";
+
+        alert("Google account selected");
+    }
+
+    // Form submit
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const msgBox = document.getElementById("messageBox");
+
+        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        // Validation
+        if(provider === "LOCAL" && password.length < 6){
+            msgBox.innerText = "Password must be at least 6 characters";
+            msgBox.className = "error";
+            return;
+        }
+
+        const payload = {
+            username: username,
+            email: email,
+            password: provider === "LOCAL" ? password : null,
+            provider: provider,
+            providerId: providerId
+        };
+
+        fetch("/api/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            msgBox.innerText = data.message;
+            msgBox.className = "success";
+
+            console.log(data);
+
+            setTimeout(() => {
+                msgBox.innerText = "";
+                msgBox.className = "";
+            }, 3000);
+        })
+        .catch(err => {
+            msgBox.innerText = "Error while registering";
+            msgBox.className = "error";
+
+            console.error(err);
+        });
+    });
+</script>
+
+</body>
+</html>

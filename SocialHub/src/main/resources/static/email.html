@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Animated Email Sender</title>
+
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: "Poppins", sans-serif;
+        }
+
+        body {
+          height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: linear-gradient(270deg, #6a11cb, #2575fc);
+          background-size: 400% 400%;
+          animation: gradientBG 10s ease infinite;
+        }
+
+        @keyframes gradientBG {
+          0% {background-position: 0% 50%;}
+          50% {background-position: 100% 50%;}
+          100% {background-position: 0% 50%;}
+        }
+
+        .container {
+          width: 420px;
+          padding: 25px;
+          border-radius: 20px;
+          backdrop-filter: blur(15px);
+          background: rgba(255,255,255,0.1);
+          box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+          color: #fff;
+          animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+          from {opacity: 0; transform: translateY(30px);}
+          to {opacity: 1; transform: translateY(0);}
+        }
+
+        h2 {
+          text-align: center;
+          margin-bottom: 15px;
+        }
+
+        .input-group {
+          margin-bottom: 15px;
+        }
+
+        input, textarea {
+          width: 100%;
+          padding: 12px;
+          border-radius: 10px;
+          border: none;
+          outline: none;
+          margin-top: 5px;
+          transition: 0.3s;
+        }
+
+        input:focus, textarea:focus {
+          transform: scale(1.03);
+          box-shadow: 0 0 10px #00f2ff;
+        }
+
+        textarea {
+          resize: none;
+        }
+
+        .file-box {
+          background: rgba(255,255,255,0.2);
+          padding: 10px;
+          border-radius: 10px;
+          cursor: pointer;
+          text-align: center;
+          transition: 0.3s;
+        }
+
+        .file-box:hover {
+          background: rgba(255,255,255,0.3);
+        }
+
+        button {
+          width: 100%;
+          padding: 12px;
+          border: none;
+          border-radius: 10px;
+          background: #00c6ff;
+          color: #fff;
+          font-size: 16px;
+          cursor: pointer;
+          transition: 0.3s;
+          position: relative;
+        }
+
+        button:hover {
+          background: #0072ff;
+        }
+
+        .loader {
+          width: 20px;
+          height: 20px;
+          border: 3px solid #fff;
+          border-top: 3px solid transparent;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: auto;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .response {
+          text-align: center;
+          margin-top: 15px;
+          font-weight: bold;
+          opacity: 0;
+          transition: 0.5s;
+        }
+
+        .show {
+          opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>📧 Email Sender</h2>
+
+    <div class="input-group">
+        <label>To (comma separated)</label>
+        <input type="text" id="emails" placeholder="abc@gmail.com, xyz@gmail.com">
+    </div>
+
+    <div class="input-group">
+        <label>Subject</label>
+        <input type="text" id="subject">
+    </div>
+
+    <div class="input-group">
+        <label>Body</label>
+        <textarea id="body" rows="4"></textarea>
+    </div>
+
+    <div class="input-group">
+        <label>Attachment</label>
+        <div class="file-box">
+            <input type="file" id="file" style="display:none">
+            <span id="fileName">Click to upload</span>
+        </div>
+    </div>
+
+    <button id="sendBtn">Send Email</button>
+
+    <div class="response" id="responseMsg"></div>
+</div>
+<script>
+    const fileInput = document.getElementById("file");
+    const fileBox = document.querySelector(".file-box");
+    const fileName = document.getElementById("fileName");
+    const btn = document.getElementById("sendBtn");
+    const response = document.getElementById("responseMsg");
+
+    fileBox.onclick = () => fileInput.click();
+
+    fileInput.onchange = () => {
+      fileName.innerText = fileInput.files[0]?.name || "Click to upload";
+    };
+
+    btn.onclick = async () => {
+      const emails = document.getElementById("emails").value;
+      const subject = document.getElementById("subject").value;
+      const body = document.getElementById("body").value;
+
+      if (!emails || !subject || !body) {
+        alert("Fill all fields");
+        return;
+      }
+
+      const formData = new FormData();
+
+      // 🔥 ONLY STRING SEND (NO ARRAY, NO JSON)
+      formData.append("emails", emails);
+
+      formData.append("subject", subject);
+      formData.append("body", body);
+
+      if (fileInput.files[0]) {
+        formData.append("file", fileInput.files[0]);
+      }
+
+      btn.innerHTML = '<div class="loader"></div>';
+      btn.disabled = true;
+      response.classList.remove("show");
+
+      try {
+        const res = await fetch("http://localhost:8081/send-email", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        response.classList.add("show");
+
+        if (data.count === -1) {
+          response.innerText = "❌ Error sending emails";
+          response.style.color = "#ff4d4d";
+        } else {
+          response.innerText = `✅ ${data.count} emails sent`;
+          response.style.color = "#00ffcc";
+        }
+
+      } catch (e) {
+        response.innerText = "❌ Server Error";
+        response.style.color = "#ff4d4d";
+        response.classList.add("show");
+      }
+
+      btn.innerHTML = "Send Email";
+      btn.disabled = false;
+    };
+</script>
+
+</body>
+</html>

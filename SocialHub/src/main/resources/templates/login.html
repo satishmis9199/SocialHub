@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>SocialHub | Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+         /* 🔥 GOOGLE BUTTON */
+        .google-btn{
+            background:white;
+            color:#444;
+            border-radius:30px;
+            padding:10px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            font-weight:600;
+            transition:.3s;
+        }
+
+        .google-btn:hover{
+            transform:scale(1.03);
+            box-shadow:0 10px 25px rgba(0,0,0,.4);
+        }
+
+        .google-icon{
+            width:20px;
+        }
+
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: white;
+            width: 350px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: gray;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .login-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .google-btn {
+            display: block;
+            text-decoration: none;
+            background: #db4437;
+            color: white;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <div class="logo">SocialHub</div>
+    <div class="subtitle">Login to continue</div>
+
+    <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+
+        <button id="loginBtn" class="btn login-btn" type="submit">Login</button>
+    </form>
+
+    <a href="/oauth2/authorization/google" class="google-btn mb-3 text-decoration-none">
+        <img class="google-icon"
+             src="https://upload.wikimedia.org/wikipedia/commons/0/09/IOS_Google_icon.png">
+        Continue with Google
+    </a>
+    <a href="/api/register" class="google-btn mb-3 text-decoration-none">
+
+        Register Your Self
+    </a>
+
+    <p id="message"></p>
+
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const message = document.getElementById("message");
+        const btn = document.getElementById("loginBtn");
+
+        const data = {
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value
+        };
+
+        // 🔥 validation
+        if (!data.email || !data.password) {
+            message.className = "error";
+            message.innerText = "Please fill all fields";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Logging in...";
+
+        fetch("/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+        .then(async res => {
+            const data = await res.json();
+
+            if (!res.ok) {
+                message.className = "error";
+                message.innerText = data.message;
+                return;
+            }
+
+            message.className = "success";
+            message.innerText = data.message;
+
+            setTimeout(() => {
+                window.location.href = "/user/dashboard";
+            }, 800);
+        })
+        .catch(err => {
+            message.className = "error";
+            message.innerText = "Something went wrong";
+            console.error(err);
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerText = "Login";
+        });
+    });
+</script>
+</body>
+</html>
