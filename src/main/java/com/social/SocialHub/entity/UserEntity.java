@@ -226,7 +226,7 @@ public class UserEntity {
     private int followCount = 0;
 
     @Column(nullable = false)
-    private boolean isPrivate = true;
+    private boolean isPrivate = false;
 
     // 🔹 Account Status
     private boolean isVerified = false;
