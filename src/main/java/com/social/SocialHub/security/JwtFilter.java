@@ -41,7 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        logger.info("🔐 JwtFilter invoked for URI: {}", request.getRequestURI());
+
 
         String token = extractToken(request);
 
@@ -53,7 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().getAuthentication() == null) {
 
             try {
-                logger.debug("🔍 Validating token...");
+
 
                 if (jwtUtil.validateToken(token)) {
 
@@ -61,17 +61,16 @@ public class JwtFilter extends OncePerRequestFilter {
                     String username = jwtUtil.extractUsername(token);
                     String role = jwtUtil.extractRole(token);
 
-                    logger.info("✅ Token valid for user: {}", username);
+
 
                     CustomUserDetail userDetails;
 
                     if (LOAD_FULL_USER) {
-                        logger.debug("📦 Fetching user from DB: {}", userId);
+
 
                         UserEntity user = userRepository.findById(userId).orElse(null);
 
                         if (user == null) {
-                            logger.error("❌ User not found in DB for ID: {}", userId);
                             filterChain.doFilter(request, response);
                             return;
                         }
@@ -79,7 +78,7 @@ public class JwtFilter extends OncePerRequestFilter {
                         userDetails = new CustomUserDetail(user);
 
                     } else {
-                        logger.debug("⚡ Using JWT-only user (no DB hit)");
+
                         userDetails = new CustomUserDetail(userId, username, role);
                     }
 
@@ -92,7 +91,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    logger.info("🎯 Authentication set for user: {}", username);
+
 
                 } else {
                     logger.warn("❌ Invalid JWT token");
@@ -108,11 +107,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private String extractToken(HttpServletRequest request) {
 
-        // 1️⃣ Cookie (Primary)
+
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("token".equals(cookie.getName())) {
-                    logger.debug("🍪 Token found in cookie");
+
                     return cookie.getValue();
                 }
             }
