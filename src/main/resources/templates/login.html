@@ -111,6 +111,88 @@
           max-width: 400px;
           padding: 16px;
         }
+        /* =========================
+   TOP NOTICE BAR
+========================= */
+
+.top-notice{
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+
+    z-index: 999999;
+
+    background: linear-gradient(
+        135deg,
+        #ff5f6d,
+        #ff9966
+    );
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    padding: 14px 18px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    letter-spacing: .2px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.25);
+
+    animation: noticeSlideDown .6s ease;
+}
+
+@keyframes noticeSlideDown{
+
+    from{
+        transform: translateY(-100%);
+    }
+
+    to{
+        transform: translateY(0);
+    }
+}
+
+.notice-live{
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    animation: pulseLive 1.5s infinite;
+}
+
+@keyframes pulseLive{
+
+    0%{
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50%{
+        transform: scale(1.5);
+        opacity: .5;
+    }
+
+    100%{
+        transform: scale(1);
+        opacity: 1;
+    }
+}
 
         .card {
           background: var(--card);
@@ -447,6 +529,19 @@
     </style>
 </head>
 <body>
+<!-- =========================
+     TOP NOTICE
+========================= -->
+
+<div class="top-notice">
+
+    <div class="notice-live"></div>
+
+    PLEASE DO NOT LOGIN OR REGISTER
+    WITH GOOGLE — FEATURE CURRENTLY
+    UNDER MAINTENANCE
+
+</div>
 
 <!-- Ambient Background -->
 <div class="bg-mesh">

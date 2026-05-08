@@ -8,6 +8,189 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
     <style>
+
+
+
+        /* =========================
+   NOTICE POPUP MODAL
+========================= */
+
+.notice-overlay{
+    position: fixed;
+    inset: 0;
+
+    width: 100%;
+    height: 100vh;
+
+    background: rgba(0,0,0,.75);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 999999;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: .35s ease;
+}
+
+.notice-overlay.show{
+    opacity: 1;
+    visibility: visible;
+}
+
+.notice-box{
+
+    width: 92%;
+    max-width: 520px;
+
+    background: #111114;
+
+    border-radius: 26px;
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    overflow: hidden;
+
+    box-shadow:
+            0 20px 60px rgba(0,0,0,.45);
+
+    animation: modalPopup .35s ease;
+}
+
+@keyframes modalPopup{
+
+    from{
+        transform: scale(.82) translateY(30px);
+        opacity: 0;
+    }
+
+    to{
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.notice-header{
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 18px 22px;
+
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.notice-badge{
+
+    background: linear-gradient(135deg,#ff4d6d,#ff7b00);
+
+    color: white;
+
+    padding: 8px 15px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.notice-close{
+
+    background: transparent;
+    border: none;
+
+    color: #aaa;
+
+    font-size: 22px;
+
+    cursor: pointer;
+}
+
+.notice-content{
+
+    padding: 30px 25px;
+}
+
+.notice-content h2{
+
+    color: white;
+
+    font-size: 30px;
+
+    margin-bottom: 14px;
+}
+
+.notice-content p{
+
+    color: #aaa;
+
+    line-height: 1.8;
+
+    margin-bottom: 25px;
+}
+
+.notice-points{
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+.notice-item{
+
+    background: #1a1a20;
+
+    border: 1px solid rgba(255,255,255,.05);
+
+    padding: 14px 16px;
+
+    border-radius: 14px;
+
+    color: #ddd;
+
+    font-size: 14px;
+}
+
+.notice-footer{
+
+    padding: 20px;
+
+    border-top: 1px solid rgba(255,255,255,.06);
+}
+
+.notice-btn{
+
+    width: 100%;
+    height: 50px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background: linear-gradient(135deg,#ff4d6d,#ff7b00);
+
+    color: white;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: .25s;
+}
+
+.notice-btn:hover{
+
+    transform: translateY(-2px);
+}
         /* ═══════════════════════════════════════
            RESET & TOKENS
         ═══════════════════════════════════════ */
@@ -1171,490 +1354,598 @@
 </div>
 
 <script>
-    /* ═══════════════════════════════════════
-       STATE
-    ═══════════════════════════════════════ */
-    let cursor = null;
-    let loading = false;
-    let finished = false;
-    let currentPostId = null;
-    const likedPosts = new Set();
-    const savedPosts = new Set();
 
-    /* ═══════════════════════════════════════
-       TOAST
-    ═══════════════════════════════════════ */
-    function toast(msg, type = "success", duration = 3200) {
-      const icons = { success:"✓", error:"✕", info:"ℹ", warn:"⚠" };
-      const w = document.getElementById("toastWrap");
-      const el = document.createElement("div");
-      el.className = `toast ${type}`;
-      el.textContent = `${icons[type] || ""} ${msg}`;
-      w.appendChild(el);
-      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("show")));
-      setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 350); }, duration);
-    }
+function openNoticeModal(){
 
-    /* ═══════════════════════════════════════
-       LOADER
-    ═══════════════════════════════════════ */
-    function hideScreenLoader() {
-      document.getElementById("screenLoader").classList.add("hide");
-    }
+ document
+     .getElementById("noticeModal")
+     .classList
+     .add("show");
+}
 
-    /* ═══════════════════════════════════════
-       FORMAT
-    ═══════════════════════════════════════ */
-    function fmt(n) {
-      if (!n) return "0";
-      if (n >= 1_000_000) return (n/1_000_000).toFixed(1).replace(/\.0$/,'') + 'M';
-      if (n >= 1_000)     return (n/1_000).toFixed(1).replace(/\.0$/,'') + 'K';
-      return String(n);
-    }
+function closeNoticeModal(){
 
-    function timeAgo(ts) {
-      if (!ts) return "";
-      const d = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
-      if (d < 60)   return `${d}s`;
-      if (d < 3600) return `${Math.floor(d/60)}m`;
-      if (d < 86400)return `${Math.floor(d/3600)}h`;
-      return `${Math.floor(d/86400)}d`;
-    }
+ document
+     .getElementById("noticeModal")
+     .classList
+     .remove("show");
+}
 
-    /* ═══════════════════════════════════════
-       NAVIGATION
-    ═══════════════════════════════════════ */
-    function goHome()       { window.scrollTo({top:0,behavior:'smooth'}); }
-    function goProfile()    { location.href="/user/myProfile"; }
-    function goMessages()   { location.href="/messages"; }
-    function goCreatePost() { location.href="/user/create-post"; }
-    function logout() {
-      fetch("/api/logout",{method:"POST"}).then(()=>location.href="api/login");
-    }
+/* OPEN ON PAGE LOAD */
 
-    function onSearch(v) {
-      if (v.length > 2) toast(`Searching for "${v}"…`, "info", 1500);
-    }
+window.addEventListener("load", () => {
 
-    /* ═══════════════════════════════════════
-       NOTIFICATIONS
-    ═══════════════════════════════════════ */
-    function toggleNotifPanel() {
-      const p = document.getElementById("notifPanel");
-      const dot = document.getElementById("notifDot");
-      const shown = p.style.display !== "none";
-      p.style.display = shown ? "none" : "block";
-      if (!shown) {
-        dot.style.display = "none";
-        document.querySelectorAll(".mnav-dot").forEach(d=>d.style.display="none");
-      }
-    }
+ setTimeout(() => {
 
-    /* ═══════════════════════════════════════
-       STORIES
-    ═══════════════════════════════════════ */
-    function loadStories() {
-      const avatars = [11,22,33,44,55,66,77,12];
-      const names = ["aryan","design.x","codelab","ux_mag","dev_io","frontend","pixel","build"];
-      const row = document.getElementById("storiesScroll");
-      avatars.forEach((a,i) => {
-        const seen = i > 4;
-        const el = document.createElement("div");
-        el.className = "story-item";
-        el.innerHTML = `
-          <div class="story-ring ${seen?'seen':''}">
-            <img src="https://i.pravatar.cc/80?img=${a}" alt="${names[i]}">
-          </div>
-          <span class="story-name">${names[i]}</span>`;
-        el.onclick = () => toast(`${names[i]}'s story — coming soon`, "info", 2000);
-        row.appendChild(el);
-      });
-    }
+     openNoticeModal();
 
-    /* ═══════════════════════════════════════
-       BUILD POST HTML
-    ═══════════════════════════════════════ */
-    function buildPost(p, idx) {
-      const profileLink = `/user/profile/${encodeURIComponent(p.userId)}`;
-      const pic = p.profilePic || `https://i.pravatar.cc/80?img=${(idx % 20)+1}`;
-     const liked = p.liked === true;
+ }, 1000);
+
+});
+ /* ═══════════════════════════════════════
+    STATE
+ ═══════════════════════════════════════ */
+ let cursor = null;
+ let loading = false;
+ let finished = false;
+ let currentPostId = null;
+ const likedPosts = new Set();
+ const savedPosts = new Set();
+
+ /* ═══════════════════════════════════════
+    TOAST
+ ═══════════════════════════════════════ */
+ function toast(msg, type = "success", duration = 3200) {
+   const icons = { success:"✓", error:"✕", info:"ℹ", warn:"⚠" };
+   const w = document.getElementById("toastWrap");
+   const el = document.createElement("div");
+   el.className = `toast ${type}`;
+   el.textContent = `${icons[type] || ""} ${msg}`;
+   w.appendChild(el);
+   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("show")));
+   setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 350); }, duration);
+ }
+
+ /* ═══════════════════════════════════════
+    LOADER
+ ═══════════════════════════════════════ */
+ function hideScreenLoader() {
+   document.getElementById("screenLoader").classList.add("hide");
+ }
+
+ /* ═══════════════════════════════════════
+    FORMAT
+ ═══════════════════════════════════════ */
+ function fmt(n) {
+   if (!n) return "0";
+   if (n >= 1_000_000) return (n/1_000_000).toFixed(1).replace(/\.0$/,'') + 'M';
+   if (n >= 1_000)     return (n/1_000).toFixed(1).replace(/\.0$/,'') + 'K';
+   return String(n);
+ }
+
+ function timeAgo(ts) {
+   if (!ts) return "";
+   const d = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
+   if (d < 60)   return `${d}s`;
+   if (d < 3600) return `${Math.floor(d/60)}m`;
+   if (d < 86400)return `${Math.floor(d/3600)}h`;
+   return `${Math.floor(d/86400)}d`;
+ }
+
+ /* ═══════════════════════════════════════
+    NAVIGATION
+ ═══════════════════════════════════════ */
+ function goHome()       { window.scrollTo({top:0,behavior:'smooth'}); }
+ function goProfile()    { location.href="/user/myProfile"; }
+ function goMessages()   { location.href="/messages"; }
+ function goCreatePost() { location.href="/user/create-post"; }
+ function logout() {
+   fetch("/api/logout",{method:"POST"}).then(()=>location.href="api/login");
+ }
+
+ function onSearch(v) {
+   if (v.length > 2) toast(`Searching for "${v}"…`, "info", 1500);
+ }
+
+ /* ═══════════════════════════════════════
+    NOTIFICATIONS
+ ═══════════════════════════════════════ */
+ function toggleNotifPanel() {
+   const p = document.getElementById("notifPanel");
+   const dot = document.getElementById("notifDot");
+   const shown = p.style.display !== "none";
+   p.style.display = shown ? "none" : "block";
+   if (!shown) {
+     dot.style.display = "none";
+     document.querySelectorAll(".mnav-dot").forEach(d=>d.style.display="none");
+   }
+ }
+
+ /* ═══════════════════════════════════════
+    STORIES
+ ═══════════════════════════════════════ */
+ function loadStories() {
+   const avatars = [11,22,33,44,55,66,77,12];
+   const names = ["aryan","design.x","codelab","ux_mag","dev_io","frontend","pixel","build"];
+   const row = document.getElementById("storiesScroll");
+   avatars.forEach((a,i) => {
+     const seen = i > 4;
+     const el = document.createElement("div");
+     el.className = "story-item";
+     el.innerHTML = `
+       <div class="story-ring ${seen?'seen':''}">
+         <img src="https://i.pravatar.cc/80?img=${a}" alt="${names[i]}">
+       </div>
+       <span class="story-name">${names[i]}</span>`;
+     el.onclick = () => toast(`${names[i]}'s story — coming soon`, "info", 2000);
+     row.appendChild(el);
+   });
+ }
+
+ /* ═══════════════════════════════════════
+    BUILD POST HTML
+ ═══════════════════════════════════════ */
+ function buildPost(p, idx) {
+   const profileLink = `/user/profile/${encodeURIComponent(p.userId)}`;
+   const pic = p.profilePic || `https://i.pravatar.cc/80?img=${(idx % 20)+1}`;
+  const liked = p.liked === true;
 
 if (liked) {
-   likedPosts.add(p.postId);
+likedPosts.add(p.postId);
 }
-      const saved = savedPosts.has(p.postId);
-      const ago = timeAgo(p.createdAt);
+   const saved = savedPosts.has(p.postId);
+   const ago = timeAgo(p.createdAt);
 
-      let mediaHtml = "";
-      if (p.media && p.media.length > 0) {
-        const m = p.media[0];
-        if (m.type === "VIDEO") {
-          mediaHtml = `
-            <div class="post-media">
-              <video src="${m.url}" controls playsinline></video>
-              <span class="media-badge">▶ Video</span>
-              <div class="heart-burst" id="hb-${p.postId}">❤️</div>
-            </div>`;
-        } else {
-          mediaHtml = `
-            <div class="post-media" id="media-${p.postId}" ondblclick="doubleTapLike('${p.postId}')">
-              <img src="${m.url}" alt="post" loading="lazy">
-              ${p.media.length > 1 ? `<span class="media-badge">⧉ ${p.media.length}</span>` : ""}
-              <div class="heart-burst" id="hb-${p.postId}">❤️</div>
-            </div>`;
-        }
-      }
+   let mediaHtml = "";
+   if (p.media && p.media.length > 0) {
+     const m = p.media[0];
+     if (m.type === "VIDEO") {
+       mediaHtml = `
+         <div class="post-media">
+           <video src="${m.url}" controls playsinline></video>
+           <span class="media-badge">▶ Video</span>
+           <div class="heart-burst" id="hb-${p.postId}">❤️</div>
+         </div>`;
+     } else {
+       mediaHtml = `
+         <div class="post-media" id="media-${p.postId}" ondblclick="doubleTapLike('${p.postId}')">
+           <img src="${m.url}" alt="post" loading="lazy">
+           ${p.media.length > 1 ? `<span class="media-badge">⧉ ${p.media.length}</span>` : ""}
+           <div class="heart-burst" id="hb-${p.postId}">❤️</div>
+         </div>`;
+     }
+   }
 
-      const caption = p.caption || "";
-      const shortCaption = caption.length > 90
-        ? `${caption.slice(0,90)}<span class="caption-more" onclick="expandCaption(this)">… more</span><span class="caption-full" style="display:none">${caption.slice(90)}</span>`
-        : caption;
+   const caption = p.caption || "";
+   const shortCaption = caption.length > 90
+     ? `${caption.slice(0,90)}<span class="caption-more" onclick="expandCaption(this)">… more</span><span class="caption-full" style="display:none">${caption.slice(90)}</span>`
+     : caption;
 
-      return `
-    <div class="post" style="animation-delay:${idx * 0.06}s">
-      <div class="post-header">
-        <div class="ph-avatar-wrap">
-          <img class="ph-avatar" src="${pic}" alt="${p.username}" onclick="location.href='${profileLink}'">
-        </div>
-        <div class="ph-info">
-          <div class="ph-username" onclick="location.href='${profileLink}'">
-            ${p.username || "Unknown"}
-            ${p.verified ? '<span class="verified-icon">✓</span>' : ""}
-          </div>
-          <div class="ph-time">${ago}</div>
-        </div>
-        <button class="ph-more" onclick="postOptions('${p.postId}')">···</button>
-      </div>
+   return `
+ <div class="post" style="animation-delay:${idx * 0.06}s">
+   <div class="post-header">
+     <div class="ph-avatar-wrap">
+       <img class="ph-avatar" src="${pic}" alt="${p.username}" onclick="location.href='${profileLink}'">
+     </div>
+     <div class="ph-info">
+       <div class="ph-username" onclick="location.href='${profileLink}'">
+         ${p.username || "Unknown"}
+         ${p.verified ? '<span class="verified-icon">✓</span>' : ""}
+       </div>
+       <div class="ph-time">${ago}</div>
+     </div>
+     <button class="ph-more" onclick="postOptions('${p.postId}')">···</button>
+   </div>
 
-      ${mediaHtml}
+   ${mediaHtml}
 
-      <div class="post-actions">
-        <button class="action-btn ${liked?'liked':''}" id="like-btn-${p.postId}" onclick="toggleLike('${p.postId}')">
-          <span class="icon">${liked?"❤️":"🤍"}</span>
-          <span class="action-count" id="count-${p.postId}">${fmt(p.likeCount||0)}</span>
-        </button>
-        <button class="action-btn" onclick="openComments('${p.postId}')">
-          <span class="icon">💬</span>
-          <span class="action-count">${fmt(p.commentCount||0)}</span>
-        </button>
-        <button class="action-btn" onclick="sharePost('${p.postId}')">
-          <span class="icon">↗</span>
-        </button>
-        <button class="action-btn save-btn ${saved?'liked':''}" id="save-btn-${p.postId}" onclick="toggleSave('${p.postId}')">
-          <span class="icon">${saved?"🔖":"🔖"}</span>
-        </button>
-      </div>
+   <div class="post-actions">
+     <button class="action-btn ${liked?'liked':''}" id="like-btn-${p.postId}" onclick="toggleLike('${p.postId}')">
+       <span class="icon">${liked?"❤️":"🤍"}</span>
+       <span class="action-count" id="count-${p.postId}">${fmt(p.likeCount||0)}</span>
+     </button>
+     <button class="action-btn" onclick="openComments('${p.postId}')">
+       <span class="icon">💬</span>
+       <span class="action-count">${fmt(p.commentCount||0)}</span>
+     </button>
+     <button class="action-btn" onclick="sharePost('${p.postId}')">
+       <span class="icon">↗</span>
+     </button>
+     <button class="action-btn save-btn ${saved?'liked':''}" id="save-btn-${p.postId}" onclick="toggleSave('${p.postId}')">
+       <span class="icon">${saved?"🔖":"🔖"}</span>
+     </button>
+   </div>
 
-      <div class="post-info">
-        <div class="like-summary" id="like-summary-${p.postId}">${fmt(p.likeCount||0)} likes</div>
-        <div class="caption-text">
-          <span class="caption-user" onclick="location.href='${profileLink}'">${p.username}</span>${shortCaption}
-        </div>
-        <span class="view-comments" onclick="openComments('${p.postId}')">
-          View all ${fmt(p.commentCount||0)} comments
-        </span>
-      </div>
+   <div class="post-info">
+     <div class="like-summary" id="like-summary-${p.postId}">${fmt(p.likeCount||0)} likes</div>
+     <div class="caption-text">
+       <span class="caption-user" onclick="location.href='${profileLink}'">${p.username}</span>${shortCaption}
+     </div>
+     <span class="view-comments" onclick="openComments('${p.postId}')">
+       View all ${fmt(p.commentCount||0)} comments
+     </span>
+   </div>
 
-      <div class="quick-comment">
-        <img class="qc-avatar" src="https://i.pravatar.cc/60?img=32" alt="">
-        <input class="qc-input" placeholder="Add a comment…" onkeydown="if(event.key==='Enter'&&this.value.trim()){quickComment('${p.postId}',this);}" >
-        <button class="qc-send" onclick="this.previousElementSibling.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}))">Post</button>
-      </div>
-    </div>`;
-    }
+   <div class="quick-comment">
+     <img class="qc-avatar" src="https://i.pravatar.cc/60?img=32" alt="">
+     <input class="qc-input" placeholder="Add a comment…" onkeydown="if(event.key==='Enter'&&this.value.trim()){quickComment('${p.postId}',this);}" >
+     <button class="qc-send" onclick="this.previousElementSibling.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}))">Post</button>
+   </div>
+ </div>`;
+ }
 
-    /* ═══════════════════════════════════════
-       LOAD POSTS (infinite scroll)
-    ═══════════════════════════════════════ */
-    let postIndex = 0;
+ /* ═══════════════════════════════════════
+    LOAD POSTS (infinite scroll)
+ ═══════════════════════════════════════ */
+ let postIndex = 0;
 
-    async function loadPosts() {
-      if (loading || finished) return;
-      loading = true;
+ async function loadPosts() {
+   if (loading || finished) return;
+   loading = true;
 
-      try {
-        let url = `/user/post/feed?limit=5`;
-        if (cursor) url += `&cursor=${cursor}`;
+   try {
+     let url = `/user/post/feed?limit=5`;
+     if (cursor) url += `&cursor=${cursor}`;
 
-        const res = await fetch(url);
-        const data = await res.json();
+     const res = await fetch(url);
+     const data = await res.json();
 
-        if (!res.ok) throw new Error(data.message || `Error ${res.status}`);
+     if (!res.ok) throw new Error(data.message || `Error ${res.status}`);
 
-        const posts = data.data || [];
+     const posts = data.data || [];
 
-        if (posts.length === 0) {
-          finished = true;
-          document.getElementById("feedLoader").classList.add("hide");
-          document.getElementById("feedEnd").style.display = "block";
-          return;
-        }
+     if (posts.length === 0) {
+       finished = true;
+       document.getElementById("feedLoader").classList.add("hide");
+       document.getElementById("feedEnd").style.display = "block";
+       return;
+     }
 
-        const html = posts.map((p, i) => buildPost(p, postIndex + i)).join("");
-        document.getElementById("feed").insertAdjacentHTML("beforeend", html);
-        postIndex += posts.length;
+     const html = posts.map((p, i) => buildPost(p, postIndex + i)).join("");
+     document.getElementById("feed").insertAdjacentHTML("beforeend", html);
+     postIndex += posts.length;
 
-        cursor = data.nextCursor || null;
-        if (!cursor) {
-          finished = true;
-          document.getElementById("feedLoader").classList.add("hide");
-          document.getElementById("feedEnd").style.display = "block";
-        }
+     cursor = data.nextCursor || null;
+     if (!cursor) {
+       finished = true;
+       document.getElementById("feedLoader").classList.add("hide");
+       document.getElementById("feedEnd").style.display = "block";
+     }
 
-      } catch (err) {
-        console.error("Feed error:", err);
-        toast(err.message || "Failed to load posts. Please refresh.", "error", 5000);
-        /* ── DEMO FALLBACK (remove when backend is ready) ── */
-        loadDemoPost();
-      } finally {
-        loading = false;
-        hideScreenLoader();
-      }
-    }
+   } catch (err) {
+     console.error("Feed error:", err);
+     toast(err.message || "Failed to load posts. Please refresh.", "error", 5000);
+     /* ── DEMO FALLBACK (remove when backend is ready) ── */
+     loadDemoPost();
+   } finally {
+     loading = false;
+     hideScreenLoader();
+   }
+ }
 
-    /* demo posts if backend not available */
-    function loadDemoPost() {
-      if (postIndex > 0) return; // only once
-      const demo = [
-        { postId:"d1", userId:"u1", username:"aryan.dev", verified:true, profilePic:`https://i.pravatar.cc/80?img=32`, likeCount:1248, commentCount:84, caption:"Just shipped a major UI update 🚀 Mobile-first, dark mode, buttery animations — this is the future of SocialHub. What do you think?", media:[{type:"IMAGE",url:`https://picsum.photos/seed/a1/600/750`}], createdAt: new Date(Date.now()-3600000).toISOString() },
-        { postId:"d2", userId:"u2", username:"ui_queen",  verified:false, profilePic:`https://i.pravatar.cc/80?img=44`, likeCount:892,  commentCount:31, caption:"Design systems are the backbone of every great product. Consistency beats creativity every time. 🎨", media:[{type:"IMAGE",url:`https://picsum.photos/seed/b2/600/750`}], createdAt: new Date(Date.now()-7200000).toISOString() },
-        { postId:"d3", userId:"u3", username:"codemaster",verified:false, profilePic:`https://i.pravatar.cc/80?img=55`, likeCount:2100, commentCount:153,caption:"Spring Boot + WebSockets = realtime magic ✨ #java #springboot #backend", media:[{type:"IMAGE",url:`https://picsum.photos/seed/c3/600/750`}], createdAt: new Date(Date.now()-18000000).toISOString() },
-      ];
-      const html = demo.map((p,i) => buildPost(p, i)).join("");
-      document.getElementById("feed").insertAdjacentHTML("beforeend", html);
-      postIndex += demo.length;
-      finished = true;
-      document.getElementById("feedLoader").classList.add("hide");
-      document.getElementById("feedEnd").style.display = "block";
-    }
+ /* demo posts if backend not available */
+ function loadDemoPost() {
+   if (postIndex > 0) return; // only once
+   const demo = [
+     { postId:"d1", userId:"u1", username:"aryan.dev", verified:true, profilePic:`https://i.pravatar.cc/80?img=32`, likeCount:1248, commentCount:84, caption:"Just shipped a major UI update 🚀 Mobile-first, dark mode, buttery animations — this is the future of SocialHub. What do you think?", media:[{type:"IMAGE",url:`https://picsum.photos/seed/a1/600/750`}], createdAt: new Date(Date.now()-3600000).toISOString() },
+     { postId:"d2", userId:"u2", username:"ui_queen",  verified:false, profilePic:`https://i.pravatar.cc/80?img=44`, likeCount:892,  commentCount:31, caption:"Design systems are the backbone of every great product. Consistency beats creativity every time. 🎨", media:[{type:"IMAGE",url:`https://picsum.photos/seed/b2/600/750`}], createdAt: new Date(Date.now()-7200000).toISOString() },
+     { postId:"d3", userId:"u3", username:"codemaster",verified:false, profilePic:`https://i.pravatar.cc/80?img=55`, likeCount:2100, commentCount:153,caption:"Spring Boot + WebSockets = realtime magic ✨ #java #springboot #backend", media:[{type:"IMAGE",url:`https://picsum.photos/seed/c3/600/750`}], createdAt: new Date(Date.now()-18000000).toISOString() },
+   ];
+   const html = demo.map((p,i) => buildPost(p, i)).join("");
+   document.getElementById("feed").insertAdjacentHTML("beforeend", html);
+   postIndex += demo.length;
+   finished = true;
+   document.getElementById("feedLoader").classList.add("hide");
+   document.getElementById("feedEnd").style.display = "block";
+ }
 
-    /* ═══════════════════════════════════════
-       LIKE
-    ═══════════════════════════════════════ */
-    async function toggleLike(postId) {
-      const btn = document.getElementById(`like-btn-${postId}`);
-      if (!btn) return;
+ /* ═══════════════════════════════════════
+    LIKE
+ ═══════════════════════════════════════ */
+ async function toggleLike(postId) {
+   const btn = document.getElementById(`like-btn-${postId}`);
+   if (!btn) return;
 
-      const wasLiked = likedPosts.has(postId);
+   const wasLiked = likedPosts.has(postId);
 
-      // Optimistic UI
-      if (wasLiked) {
-        likedPosts.delete(postId);
-        btn.classList.remove("liked");
-        btn.querySelector(".icon").textContent = "🤍";
-      } else {
-        likedPosts.add(postId);
-        btn.classList.add("liked");
-        btn.querySelector(".icon").textContent = "❤️";
-      }
+   // Optimistic UI
+   if (wasLiked) {
+     likedPosts.delete(postId);
+     btn.classList.remove("liked");
+     btn.querySelector(".icon").textContent = "🤍";
+   } else {
+     likedPosts.add(postId);
+     btn.classList.add("liked");
+     btn.querySelector(".icon").textContent = "❤️";
+   }
 
-      // Update counts optimistically
-      const countEl = document.getElementById(`count-${postId}`);
-      const summaryEl = document.getElementById(`like-summary-${postId}`);
-      const cur = parseInt(countEl.dataset.raw || countEl.textContent) || 0;
-      const next = wasLiked ? Math.max(0, cur-1) : cur+1;
-      countEl.dataset.raw = next;
-      countEl.textContent = fmt(next);
-      if (summaryEl) summaryEl.textContent = `${fmt(next)} likes`;
+   // Update counts optimistically
+   const countEl = document.getElementById(`count-${postId}`);
+   const summaryEl = document.getElementById(`like-summary-${postId}`);
+   const cur = parseInt(countEl.dataset.raw || countEl.textContent) || 0;
+   const next = wasLiked ? Math.max(0, cur-1) : cur+1;
+   countEl.dataset.raw = next;
+   countEl.textContent = fmt(next);
+   if (summaryEl) summaryEl.textContent = `${fmt(next)} likes`;
 
-      try {
-        const res = await fetch("/user/post/toggle", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type":"application/json" },
-          body: JSON.stringify({ postId })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Like failed");
+   try {
+     const res = await fetch("/user/post/toggle", {
+       method: "POST",
+       credentials: "include",
+       headers: { "Content-Type":"application/json" },
+       body: JSON.stringify({ postId })
+     });
+     const data = await res.json();
+     if (!res.ok) throw new Error(data.message || "Like failed");
 
-        // Reconcile with server
-        const serverLiked = data.liked;
-        const serverCount = data.likeCount;
-        if (serverLiked) likedPosts.add(postId); else likedPosts.delete(postId);
-        btn.classList.toggle("liked", serverLiked);
-        btn.querySelector(".icon").textContent = serverLiked ? "❤️" : "🤍";
-        countEl.dataset.raw = serverCount;
-        countEl.textContent = fmt(serverCount);
-        if (summaryEl) summaryEl.textContent = `${fmt(serverCount)} likes`;
+     // Reconcile with server
+     const serverLiked = data.liked;
+     const serverCount = data.likeCount;
+     if (serverLiked) likedPosts.add(postId); else likedPosts.delete(postId);
+     btn.classList.toggle("liked", serverLiked);
+     btn.querySelector(".icon").textContent = serverLiked ? "❤️" : "🤍";
+     countEl.dataset.raw = serverCount;
+     countEl.textContent = fmt(serverCount);
+     if (summaryEl) summaryEl.textContent = `${fmt(serverCount)} likes`;
 
-      } catch(err) {
-        // Rollback
-        if (wasLiked) { likedPosts.add(postId); btn.classList.add("liked"); btn.querySelector(".icon").textContent="❤️"; }
-        else          { likedPosts.delete(postId); btn.classList.remove("liked"); btn.querySelector(".icon").textContent="🤍"; }
-        countEl.dataset.raw = cur;
-        countEl.textContent = fmt(cur);
-        if (summaryEl) summaryEl.textContent = `${fmt(cur)} likes`;
-        toast(err.message || "Could not update like", "error");
-      }
-    }
+   } catch(err) {
+     // Rollback
+     if (wasLiked) { likedPosts.add(postId); btn.classList.add("liked"); btn.querySelector(".icon").textContent="❤️"; }
+     else          { likedPosts.delete(postId); btn.classList.remove("liked"); btn.querySelector(".icon").textContent="🤍"; }
+     countEl.dataset.raw = cur;
+     countEl.textContent = fmt(cur);
+     if (summaryEl) summaryEl.textContent = `${fmt(cur)} likes`;
+     toast(err.message || "Could not update like", "error");
+   }
+ }
 
-    /* Double tap */
-    function doubleTapLike(postId) {
-      const hb = document.getElementById(`hb-${postId}`);
-      if (hb) {
-        hb.classList.remove("pop");
-        void hb.offsetWidth;
-        hb.classList.add("pop");
-      }
-      if (!likedPosts.has(postId)) toggleLike(postId);
-    }
+ /* Double tap */
+ function doubleTapLike(postId) {
+   const hb = document.getElementById(`hb-${postId}`);
+   if (hb) {
+     hb.classList.remove("pop");
+     void hb.offsetWidth;
+     hb.classList.add("pop");
+   }
+   if (!likedPosts.has(postId)) toggleLike(postId);
+ }
 
-    /* ═══════════════════════════════════════
-       SAVE
-    ═══════════════════════════════════════ */
-    function toggleSave(postId) {
-      const btn = document.getElementById(`save-btn-${postId}`);
-      if (!btn) return;
-      const wasSaved = savedPosts.has(postId);
-      if (wasSaved) {
-        savedPosts.delete(postId);
-        btn.classList.remove("liked");
-        toast("Removed from saved", "warn", 2000);
-      } else {
-        savedPosts.add(postId);
-        btn.classList.add("liked");
-        toast("Post saved ✦", "success", 2000);
-      }
-    }
+ /* ═══════════════════════════════════════
+    SAVE
+ ═══════════════════════════════════════ */
+ function toggleSave(postId) {
+   const btn = document.getElementById(`save-btn-${postId}`);
+   if (!btn) return;
+   const wasSaved = savedPosts.has(postId);
+   if (wasSaved) {
+     savedPosts.delete(postId);
+     btn.classList.remove("liked");
+     toast("Removed from saved", "warn", 2000);
+   } else {
+     savedPosts.add(postId);
+     btn.classList.add("liked");
+     toast("Post saved ✦", "success", 2000);
+   }
+ }
 
-    /* ═══════════════════════════════════════
-       SHARE
-    ═══════════════════════════════════════ */
-    function sharePost(postId) {
-      const url = `${location.origin}/post/${postId}`;
-      if (navigator.share) {
-        navigator.share({ title:"SocialHub", url }).catch(()=>{});
-      } else {
-        navigator.clipboard.writeText(url).then(()=>toast("Link copied!", "success",2000));
-      }
-    }
+ /* ═══════════════════════════════════════
+    SHARE
+ ═══════════════════════════════════════ */
+ function sharePost(postId) {
+   const url = `${location.origin}/post/${postId}`;
+   if (navigator.share) {
+     navigator.share({ title:"SocialHub", url }).catch(()=>{});
+   } else {
+     navigator.clipboard.writeText(url).then(()=>toast("Link copied!", "success",2000));
+   }
+ }
 
-    /* ═══════════════════════════════════════
-       POST OPTIONS
-    ═══════════════════════════════════════ */
-    function postOptions(postId) {
-      toast("Options menu coming soon", "info", 2000);
-    }
+ /* ═══════════════════════════════════════
+    POST OPTIONS
+ ═══════════════════════════════════════ */
+ function postOptions(postId) {
+   toast("Options menu coming soon", "info", 2000);
+ }
 
-    /* ═══════════════════════════════════════
-       CAPTION EXPAND
-    ═══════════════════════════════════════ */
-    function expandCaption(el) {
-      const full = el.nextElementSibling;
-      if (full) { full.style.display="inline"; el.remove(); }
-    }
+ /* ═══════════════════════════════════════
+    CAPTION EXPAND
+ ═══════════════════════════════════════ */
+ function expandCaption(el) {
+   const full = el.nextElementSibling;
+   if (full) { full.style.display="inline"; el.remove(); }
+ }
 
-    /* ═══════════════════════════════════════
-       QUICK COMMENT
-    ═══════════════════════════════════════ */
-    async function quickComment(postId, input) {
-  const val = input.value.trim();
-  if (!val) return;
+ /* ═══════════════════════════════════════
+    QUICK COMMENT
+ ═══════════════════════════════════════ */
+ async function quickComment(postId, input) {
+const val = input.value.trim();
+if (!val) return;
 
-  try {
-    await fetch("/user/post/comments", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        postId,
-        text: val
-      })
-    });
+try {
+ await fetch("/user/post/comments", {
+   method: "POST",
+   headers: { "Content-Type": "application/json" },
+   body: JSON.stringify({
+     postId,
+     text: val
+   })
+ });
 
-    input.value = "";
-    toast("Comment added!", "success");
+ input.value = "";
+ toast("Comment added!", "success");
 
-  } catch (err) {
-    toast("Error adding comment", "error");
-  }
+} catch (err) {
+ toast("Error adding comment", "error");
 }
-
-    /* ═══════════════════════════════════════
-       COMMENTS MODAL
-    ═══════════════════════════════════════ */
-    const mockComments = [
-      { user:"aryan.dev",  text:"🔥 Absolutely love this!",   ago:"2m",  pic:"https://i.pravatar.cc/60?img=32" },
-      { user:"ui_queen",   text:"Stunning work as always 👏",  ago:"5m",  pic:"https://i.pravatar.cc/60?img=44" },
-      { user:"dev_ninja",  text:"How did you do the animation?",ago:"12m", pic:"https://i.pravatar.cc/60?img=11" },
-      { user:"codemaster", text:"Save this for later 🔖",      ago:"20m", pic:"https://i.pravatar.cc/60?img=55" },
-    ];
-
-   async function openComments(postId) {
-  currentPostId = postId;
-
-  const list = document.getElementById("commentsList");
-  list.innerHTML = "Loading...";
-
-  try {
-    const res = await fetch(`/user/post/comments/${postId}`);
-    const data = await res.json();
-
-    list.innerHTML = data.map(c => `
-      <div class="comment-item">
-        <img class="ci-avatar" src="${c.profilePic || 'https://i.pravatar.cc/60'}">
-        <div class="ci-content">
-          <span class="ci-user">${c.username}</span>
-          <span class="ci-text">${c.text}</span>
-          <div class="ci-time">${timeAgo(c.createdAt)}</div>
-        </div>
-      </div>
-    `).join("");
-
-  } catch (err) {
-    list.innerHTML = "Failed to load comments";
-  }
-
-  document.getElementById("commentModal").classList.add("open");
 }
 
-    function closeModal(e) {
-      if (e.target === document.getElementById("commentModal")) {
-        document.getElementById("commentModal").classList.remove("open");
-      }
-    }
+ /* ═══════════════════════════════════════
+    COMMENTS MODAL
+ ═══════════════════════════════════════ */
+ const mockComments = [
+   { user:"aryan.dev",  text:"🔥 Absolutely love this!",   ago:"2m",  pic:"https://i.pravatar.cc/60?img=32" },
+   { user:"ui_queen",   text:"Stunning work as always 👏",  ago:"5m",  pic:"https://i.pravatar.cc/60?img=44" },
+   { user:"dev_ninja",  text:"How did you do the animation?",ago:"12m", pic:"https://i.pravatar.cc/60?img=11" },
+   { user:"codemaster", text:"Save this for later 🔖",      ago:"20m", pic:"https://i.pravatar.cc/60?img=55" },
+ ];
 
-   async function addComment() {
-  const input = document.getElementById("commentText");
-  const val = input.value.trim();
-  if (!val) return;
+async function openComments(postId) {
+currentPostId = postId;
 
-  try {
-    const res = await fetch("/api/comment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        postId: currentPostId,
-        text: val
-      })
-    });
+const list = document.getElementById("commentsList");
+list.innerHTML = "Loading...";
 
-    if (!res.ok) throw new Error("Failed");
+try {
+ const res = await fetch(`/user/post/comments/${postId}`);
+ const data = await res.json();
 
-    input.value = "";
+ list.innerHTML = data.map(c => `
+   <div class="comment-item">
+     <img class="ci-avatar" src="${c.profilePic || 'https://i.pravatar.cc/60'}">
+     <div class="ci-content">
+       <span class="ci-user">${c.username}</span>
+       <span class="ci-text">${c.text}</span>
+       <div class="ci-time">${timeAgo(c.createdAt)}</div>
+     </div>
+   </div>
+ `).join("");
 
-    // reload comments
-    openComments(currentPostId);
-
-    toast("Comment posted!", "success");
-
-  } catch (err) {
-    toast("Failed to post comment", "error");
-  }
+} catch (err) {
+ list.innerHTML = "Failed to load comments";
 }
 
-    /* ═══════════════════════════════════════
-       INFINITE SCROLL
-    ═══════════════════════════════════════ */
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) loadPosts();
-    }, { threshold: 0.1 });
-    observer.observe(document.getElementById("feedLoader"));
+document.getElementById("commentModal").classList.add("open");
+}
 
-    /* ═══════════════════════════════════════
-       INIT
-    ═══════════════════════════════════════ */
-    loadStories();
-    loadPosts();
+ function closeModal(e) {
+   if (e.target === document.getElementById("commentModal")) {
+     document.getElementById("commentModal").classList.remove("open");
+   }
+ }
+
+async function addComment() {
+const input = document.getElementById("commentText");
+const val = input.value.trim();
+if (!val) return;
+
+try {
+ const res = await fetch("/api/comment", {
+   method: "POST",
+   headers: { "Content-Type": "application/json" },
+   body: JSON.stringify({
+     postId: currentPostId,
+     text: val
+   })
+ });
+
+ if (!res.ok) throw new Error("Failed");
+
+ input.value = "";
+
+ // reload comments
+ openComments(currentPostId);
+
+ toast("Comment posted!", "success");
+
+} catch (err) {
+ toast("Failed to post comment", "error");
+}
+}
+
+ /* ═══════════════════════════════════════
+    INFINITE SCROLL
+ ═══════════════════════════════════════ */
+ const observer = new IntersectionObserver(entries => {
+   if (entries[0].isIntersecting) loadPosts();
+ }, { threshold: 0.1 });
+ observer.observe(document.getElementById("feedLoader"));
+
+ /* ═══════════════════════════════════════
+    INIT
+ ═══════════════════════════════════════ */
+ loadStories();
+ loadPosts();
+
+
 </script>
+
+
+<div class="notice-overlay"
+     id="noticeModal">
+
+    <div class="notice-box">
+
+        <!-- HEADER -->
+
+        <div class="notice-header">
+
+            <div class="notice-badge">
+                📢 NOTICE
+            </div>
+
+            <button class="notice-close"
+                    onclick="closeNoticeModal()">
+                ✕
+            </button>
+
+        </div>
+
+        <!-- CONTENT -->
+
+        <div class="notice-content">
+
+            <h2>
+                Welcome to SocialHub 🚀
+            </h2>
+
+            <p>
+
+                Hi All,
+                This is a Social Media Platform...Keep posting and Enjoy here.
+
+            </p>
+
+            <div class="notice-points">
+
+                <div class="notice-item">
+                    ✅ Designed By Satish Kumar Mishra
+                </div>
+
+                <div class="notice-item">
+                    ✅ Faster Dashboard Experience
+                </div>
+
+                <div class="notice-item">
+                    ✅ System is Under Pogresss
+                </div>
+
+                <div class="notice-item">
+                    ✅ We are Regret for Any Issue Raised.
+                </div>
+                <div class="notice-item">
+                    ✅ We are Resolving all Issue on priority.
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+
+        <div class="notice-footer">
+
+            <button class="notice-btn"
+                    onclick="closeNoticeModal()">
+
+                Continue
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 </body>
 </html>
