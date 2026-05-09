@@ -584,8 +584,19 @@
     async function loadProfile() {
       try {
         const res = await fetch(API.ME, { method: 'GET', credentials: 'include' });
-        if (!res.ok) throw new Error('Unauthorized');
-        const d = await res.json();
+        console.log("PROFILE RESPONSE STATUS =", res.status);
+
+const text = await res.text();
+
+console.log("RAW RESPONSE =", text);
+
+if (!res.ok) {
+   throw new Error(`Status ${res.status}`);
+}
+
+const d = JSON.parse(text);
+
+console.log("PROFILE DATA =", d);
 
         el('profilePic').src       = d.profilePic || 'https://i.pravatar.cc/150?u=' + d.username;
         el('username').innerText   = d.username    || 'Unknown';
@@ -631,7 +642,9 @@
       } catch (err) {
         console.error(err);
         showToast('Session expired or not logged in', 'error');
-        setTimeout(() => { window.location.href = '/login'; }, 2200);
+       setTimeout(() => {
+   window.location.href = '/api/login';
+}, 2200);
       }
     }
 
