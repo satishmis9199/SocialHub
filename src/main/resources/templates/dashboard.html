@@ -1091,6 +1091,98 @@
           padding: 13px 18px;
           border-top: 1px solid var(--border);
         }
+        /* =========================
+   NOTIFICATION MODAL
+========================= */
+
+.notif-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,.7);
+
+    z-index: 999999;
+
+    display: none;
+
+    justify-content: center;
+
+    align-items: flex-end;
+}
+
+.notif-modal.show {
+
+    display: flex;
+}
+
+.notif-modal-content {
+
+    width: 100%;
+
+    max-width: 520px;
+
+    background: #111114;
+
+    border-radius: 24px 24px 0 0;
+
+    max-height: 80vh;
+
+    overflow-y: auto;
+
+    padding: 20px;
+
+    animation: notifSlide .3s ease;
+}
+
+@keyframes notifSlide {
+
+    from {
+
+        transform: translateY(40px);
+
+        opacity: 0;
+    }
+
+    to {
+
+        transform: translateY(0);
+
+        opacity: 1;
+    }
+}
+
+.notif-modal-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.notif-modal-header h3 {
+
+    color: white;
+
+    font-size: 22px;
+}
+
+.notif-close-btn {
+
+    background: transparent;
+
+    border: none;
+
+    color: #aaa;
+
+    font-size: 22px;
+
+    cursor: pointer;
+}
         .ci-my-avatar { width:30px; height:30px; border-radius:50%; object-fit:cover; }
         .ci-field {
           flex: 1;
@@ -1280,22 +1372,8 @@
             </div>
         </div>
 
-        <!-- Notifications panel (toggle) -->
-        <div class="panel-card" id="notifPanel" style="display:none">
-            <div class="panel-title">Notifications</div>
-            <div class="notif-item notif-unread">
-                <div class="notif-icon-wrap">❤️</div>
-                <div><div class="notif-text"><b>aryan.dev</b> liked your post</div><div class="notif-ago">2m ago</div></div>
-            </div>
-            <div class="notif-item notif-unread">
-                <div class="notif-icon-wrap">💬</div>
-                <div><div class="notif-text"><b>ui_queen</b> commented on your post</div><div class="notif-ago">8m ago</div></div>
-            </div>
-            <div class="notif-item">
-                <div class="notif-icon-wrap">👤</div>
-                <div><div class="notif-text"><b>codemaster</b> started following you</div><div class="notif-ago">1h ago</div></div>
-            </div>
-        </div>
+
+
 
         <!-- Trending -->
         <div class="panel-card">
@@ -1336,7 +1414,36 @@
     </button>
     <button class="mnav-btn" onclick="goProfile()">👤</button>
 </nav>
+<!-- ─── NOTIFICATION MODAL ─── -->
 
+<div class="notif-modal"
+     id="notifModal">
+
+    <div class="notif-modal-content">
+
+        <div class="notif-modal-header">
+
+            <h3>
+                Notifications
+            </h3>
+
+            <button
+                    class="notif-close-btn"
+                    onclick="closeNotifModal()">
+
+                ✕
+
+            </button>
+
+        </div>
+
+        <div id="notifList">
+
+        </div>
+
+    </div>
+
+</div>
 <!-- ─── COMMENTS MODAL ─── -->
 <div class="modal-overlay" id="commentModal" onclick="closeModal(event)">
     <div class="modal-box">
@@ -1450,16 +1557,149 @@ window.addEventListener("load", () => {
  /* ═══════════════════════════════════════
     NOTIFICATIONS
  ═══════════════════════════════════════ */
- function toggleNotifPanel() {
-   const p = document.getElementById("notifPanel");
-   const dot = document.getElementById("notifDot");
-   const shown = p.style.display !== "none";
-   p.style.display = shown ? "none" : "block";
-   if (!shown) {
-     dot.style.display = "none";
-     document.querySelectorAll(".mnav-dot").forEach(d=>d.style.display="none");
-   }
- }
+function toggleNotifPanel() {
+
+    document
+        .getElementById("notifModal")
+        .classList
+        .add("show");
+
+    loadNotifications();
+
+    document
+        .getElementById("notifDot")
+        .style.display = "none";
+
+    document
+        .querySelectorAll(".mnav-dot")
+        .forEach(
+            d => d.style.display = "none"
+        );
+}
+async function markNotificationRead(id, el) {
+
+    try {
+
+        // instant UI update
+        if(el){
+
+            el.classList.remove("notif-unread");
+        }
+
+        await fetch(
+            `/api/notifications/${id}/read`,
+            {
+                method: "PUT"
+            }
+        );
+
+    } catch (err) {
+
+        console.error(err);
+
+        toast(
+            "Failed to mark notification",
+            "error"
+        );
+    }
+}
+function closeNotifModal() {
+
+    document
+        .getElementById("notifModal")
+        .classList
+        .remove("show");
+}
+
+ async function loadNotifications() {
+
+
+    try {
+
+        const res =
+            await fetch("/api/notifications");
+
+        const data = await res.json();
+
+        const panel =
+    document.getElementById(
+        "notifList"
+    );
+
+        let html =
+            `
+            <div class="panel-title">
+                Notifications
+            </div>
+            `;
+
+        if (data.length === 0) {
+
+            html += `
+                <div class="notif-text">
+                    No notifications yet
+                </div>
+            `;
+
+        } else {
+
+            data.forEach(n => {
+
+                html += `
+
+<div class="notif-item
+     ${!n.read ? 'notif-unread' : ''}
+     "
+
+     id="notif-${n.id}"
+
+     onclick="
+        markNotificationRead('${n.id}', this)
+     ">
+
+    <div class="notif-icon-wrap">
+
+        ❤️
+
+    </div>
+
+    <div>
+
+        <div class="notif-text">
+
+            <b>
+                ${n.senderUsername}
+            </b>
+
+            liked your post
+
+        </div>
+
+        <div class="notif-ago">
+
+            ${timeAgo(n.createdAt)} ago
+
+        </div>
+
+    </div>
+
+</div>
+`;
+            });
+        }
+
+        panel.innerHTML = html;
+
+    } catch (err) {
+
+        console.error(err);
+
+        toast(
+            "Failed to load notifications",
+            "error"
+        );
+    }
+}
 
  /* ═══════════════════════════════════════
     STORIES
@@ -1941,6 +2181,34 @@ try {
                 Continue
 
             </button>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- NOTIFICATION MODAL -->
+
+<div class="notif-modal"
+     id="notifModal">
+
+    <div class="notif-modal-content">
+
+        <div class="notif-modal-header">
+
+            <h3>Notifications</h3>
+
+            <button
+                    class="notif-close-btn"
+                    onclick="closeNotifModal()">
+
+                ✕
+
+            </button>
+
+        </div>
+
+        <div id="notifList">
 
         </div>
 

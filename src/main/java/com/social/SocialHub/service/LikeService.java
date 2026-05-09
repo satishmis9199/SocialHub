@@ -1,6 +1,7 @@
 package com.social.SocialHub.service;
 
 import com.social.SocialHub.dto.LikeResponse;
+import com.social.SocialHub.dto.PostLikedEvent;
 import com.social.SocialHub.entity.Post;
 import com.social.SocialHub.entity.PostLike;
 import com.social.SocialHub.entity.UserEntity;
@@ -8,6 +9,7 @@ import com.social.SocialHub.repository.PostLikeRepository;
 import com.social.SocialHub.repository.PostRepository;
 import com.social.SocialHub.repository.UserRepository;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +22,15 @@ public class LikeService {
     private final PostLikeRepository likeRepo;
     private final PostRepository postRepo;
     private final UserRepository userRepo;
+    private final ApplicationEventPublisher eventPublisher;
 
     public LikeService(PostLikeRepository likeRepo,
                        PostRepository postRepo,
-                       UserRepository userRepo) {
+                       UserRepository userRepo, ApplicationEventPublisher eventPublisher) {
         this.likeRepo = likeRepo;
         this.postRepo = postRepo;
         this.userRepo = userRepo;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -56,6 +60,13 @@ public class LikeService {
             likeRepo.save(like);
 
             post.setLikeCount(post.getLikeCount() + 1);
+            eventPublisher.publishEvent(
+                    new PostLikedEvent(
+                            userId,
+                            post.getUser().getId(),
+                            postId
+                    )
+            );
 
             return new LikeResponse(true, post.getLikeCount());
         }
