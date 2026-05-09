@@ -2057,7 +2057,9 @@ const list = document.getElementById("commentsList");
 list.innerHTML = "Loading...";
 
 try {
- const res = await fetch(`/user/post/comments/${postId}`);
+ const res = await fetch(`/user/post/comments/${postId}`, {
+  credentials: "include"
+});
  const data = await res.json();
 
  list.innerHTML = data.map(c => `
@@ -2092,6 +2094,7 @@ if (!val) return;
 try {
  const res = await fetch("/api/comment", {
    method: "POST",
+    credentials: "include",
    headers: { "Content-Type": "application/json" },
    body: JSON.stringify({
      postId: currentPostId,
