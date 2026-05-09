@@ -1,51 +1,99 @@
 package com.social.SocialHub.service;
 
 import com.social.SocialHub.dto.MediaUploadResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class MediaService {
 
-    private static final String UPLOAD_DIR = "uploads/";
+    private final S3Client s3Client;
 
-    public List<MediaUploadResponse> upload(List<MultipartFile> files) {
+    @Value("${cloudflare.r2.bucket}")
+    private String bucket;
 
-        List<MediaUploadResponse> result = new ArrayList<>();
+    @Value("${cloudflare.r2.public-url}")
+    private String publicUrl;
+
+    public List<MediaUploadResponse> upload(
+            List<MultipartFile> files
+    ) {
+
+        List<MediaUploadResponse> result =
+                new ArrayList<>();
 
         for (MultipartFile file : files) {
 
             try {
-                String ext = Objects.requireNonNull(file.getOriginalFilename())
-                        .substring(file.getOriginalFilename().lastIndexOf("."));
 
-                String fileName = UUID.randomUUID() + ext;
+                String ext =
+                        Objects.requireNonNull(
+                                file.getOriginalFilename()
+                        ).substring(
+                                file.getOriginalFilename()
+                                        .lastIndexOf(".")
+                        );
 
-                Path path = Paths.get(UPLOAD_DIR + fileName);
-                Files.createDirectories(path.getParent());
+                String fileName =
+                        UUID.randomUUID() + ext;
 
-                Files.write(path, file.getBytes());
+                PutObjectRequest request =
+                        PutObjectRequest.builder()
 
-                String type = file.getContentType().startsWith("video") ? "VIDEO" : "IMAGE";
+                                .bucket(bucket)
 
-                result.add(new MediaUploadResponse(
-                        fileName,
-                        "/uploads/" + fileName,   // 🔥 FIX
-                        type,
-                        file.getSize()
-                ));
+                                .key(fileName)
+
+                                .contentType(
+                                        file.getContentType()
+                                )
+
+                                .build();
+
+                s3Client.putObject(
+                        request,
+                        RequestBody.fromBytes(
+                                file.getBytes()
+                        )
+                );
+
+                String fileUrl =
+                        publicUrl + "/" + fileName;
+
+                String type =
+                        file.getContentType()
+                                .startsWith("video")
+                                ? "VIDEO"
+                                : "IMAGE";
+
+                result.add(
+                        new MediaUploadResponse(
+                                fileName,
+                                fileUrl,
+                                type,
+                                file.getSize()
+                        )
+                );
 
             } catch (IOException e) {
-                throw new RuntimeException("Upload failed", e);
+
+                throw new RuntimeException(
+                        "Upload failed",
+                        e
+                );
             }
         }
 

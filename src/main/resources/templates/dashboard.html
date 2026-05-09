@@ -1269,7 +1269,11 @@
         <div class="nav-right">
             <button class="nav-btn" onclick="toggleNotifPanel()" title="Notifications">
                 🔔
-                <span class="notif-dot" id="notifDot"></span>
+                <span
+                        class="notif-dot"
+                        id="notifDot"
+                        style="display:none">
+</span>
             </button>
             <button class="nav-btn" onclick="goMessages()" title="Messages">✉️</button>
             <button class="nav-btn" onclick="goProfile()" title="Profile">👤</button>
@@ -1410,7 +1414,10 @@
     <button class="mnav-create" onclick="goCreatePost()">＋</button>
     <button class="mnav-btn" onclick="toggleNotifPanel()">
         🔔
-        <span class="mnav-dot"></span>
+        <span
+                class="mnav-dot"
+                style="display:none">
+</span>
     </button>
     <button class="mnav-btn" onclick="goProfile()">👤</button>
 </nav>
@@ -1487,6 +1494,7 @@ window.addEventListener("load", () => {
      openNoticeModal();
 
  }, 1000);
+ loadNotifications();
 
 });
  /* ═══════════════════════════════════════
@@ -1565,33 +1573,28 @@ function toggleNotifPanel() {
         .add("show");
 
     loadNotifications();
-
-    document
-        .getElementById("notifDot")
-        .style.display = "none";
-
-    document
-        .querySelectorAll(".mnav-dot")
-        .forEach(
-            d => d.style.display = "none"
-        );
 }
+
 async function markNotificationRead(id, el) {
 
     try {
 
-        // instant UI update
         if(el){
 
-            el.classList.remove("notif-unread");
+            el.classList.remove(
+                "notif-unread"
+            );
         }
 
         await fetch(
             `/api/notifications/${id}/read`,
             {
-                method: "PUT"
+                method: "PUT",
+                credentials: "include"
             }
         );
+
+        loadNotifications();
 
     } catch (err) {
 
@@ -1603,6 +1606,8 @@ async function markNotificationRead(id, el) {
         );
     }
 }
+
+
 function closeNotifModal() {
 
     document
@@ -1620,6 +1625,22 @@ function closeNotifModal() {
             await fetch("/api/notifications");
 
         const data = await res.json();
+        const hasUnread = data.some(
+    n => !n.read
+);
+
+document
+    .getElementById("notifDot")
+    .style.display =
+        hasUnread ? "block" : "none";
+
+document
+    .querySelectorAll(".mnav-dot")
+    .forEach(dot => {
+
+        dot.style.display =
+            hasUnread ? "block" : "none";
+    });
 
         const panel =
     document.getElementById(
@@ -1653,9 +1674,8 @@ function closeNotifModal() {
 
      id="notif-${n.id}"
 
-     onclick="
-        markNotificationRead('${n.id}', this)
-     ">
+     onclick="markNotificationRead('${n.id}', this)">
+
 
     <div class="notif-icon-wrap">
 

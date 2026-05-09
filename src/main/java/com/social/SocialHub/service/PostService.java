@@ -1,6 +1,5 @@
 package com.social.SocialHub.service;
 
-import com.nimbusds.jose.proc.SecurityContext;
 import com.social.SocialHub.dto.*;
 import com.social.SocialHub.entity.*;
 import com.social.SocialHub.repository.*;
@@ -12,14 +11,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -84,7 +79,7 @@ public class PostService {
             PostMedia media = new PostMedia();
             media.setPost(post);
             media.setFileName(m.getFileName());
-            media.setUrl("/uploads/" + m.getFileName());
+            media.setUrl(m.getUrl());
             media.setType(com.social.SocialHub.entity.MediaType.valueOf(m.getType()));
             media.setOrderIndex(index++);
             mediaList.add(media);
@@ -378,22 +373,28 @@ public class PostService {
         return "User Saved SuccessFully";
     }
 
-    public String uploadProfileVatar(MultipartFile file,HttpServletRequest request) throws IOException {
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+    public String uploadProfileVatar(
+            MultipartFile file,
+            HttpServletRequest request
+    ) throws IOException {
 
-        Path path = Paths.get("uploads/" + fileName);
+        List<MultipartFile> files =
+                List.of(file);
 
-        Files.copy(file.getInputStream(), path);
+        List<MediaUploadResponse> uploaded =
+                mediaService.upload(files);
 
-        String url =  "/uploads/"+ fileName;
+        String imageUrl =
+                uploaded.get(0).getUrl();
 
-        UserEntity user = getLoggedInUser();
-        user.setProfilePic(url);
-      UserEntity saved= userRepository.save(user);
-        logger.error("Url final {}",url);
-        String finalUrl=getBaseUrl(request)+saved.getProfilePic();
+        UserEntity user =
+                getLoggedInUser();
 
-        return finalUrl;
+        user.setProfilePic(imageUrl);
+
+        userRepository.save(user);
+
+        return imageUrl;
     }
 
     public List<ProfilePostDTOResponse> getLoggedUserPost(HttpServletRequest request) {
