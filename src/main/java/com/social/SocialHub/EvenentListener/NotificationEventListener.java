@@ -109,7 +109,7 @@ public class NotificationEventListener {
 
         messagingTemplate.convertAndSendToUser(
 
-                receiver.getEmail(),
+                receiver.getUsername(),
 
                 "/queue/notifications",
 
