@@ -734,9 +734,7 @@
     /* ════════════════════════════════════
        CONFIG
     ════════════════════════════════════ */
-    const BASE = location.hostname.includes("localhost")
-      ? "http://localhost:8081"
-      : "https://removable-how-cultural-acids.trycloudflare.com";
+
 
     const USER_ID = window.location.pathname.split("/").filter(Boolean).pop();
 
@@ -807,7 +805,7 @@
       btn.disabled = true;
 
       try {
-        const res = await fetch(`${BASE}/user/follow/toggle`, {
+        const res = await fetch(`/user/follow/toggle`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -921,22 +919,24 @@ console.log("Backend message : ",data.message);// 👈 यहाँ डालन
 
         const media = post.media?.[0];
         const isVideo = media?.type === "VIDEO";
-        const imgSrc = media ? BASE + media.url : `https://picsum.photos/seed/${i + 10}/400/400`;
+        const imgSrc = media
+  ? media.url
+  : `https://picsum.photos/seed/${i + 10}/400/400`;
 
         cell.innerHTML = `
           ${isVideo
-            ? `<video src="${BASE + media.url}" muted></video>`
+            ? `<video src="${media.url}" muted></video>`
             : `<img src="${imgSrc}" alt="post" loading="lazy">`}
           <div class="post-overlay">
-            <span class="overlay-stat">♥ ${fmt(post.likesCount || 0)}</span>
-            <span class="overlay-stat">💬 ${fmt(post.commentsCount || 0)}</span>
+            <span class="overlay-stat">♥ ${fmt(post.likeCount || 0)}</span>
+            <span class="overlay-stat">💬 ${fmt(post.commentCount || 0)}</span>
           </div>
           ${post.media?.length > 1 ? '<span class="multi-badge">⧉</span>' : ''}
           ${isVideo ? '<span class="video-badge">▶</span>' : ''}
           ${type === "reel" ? '<span class="reel-badge">▶ Reel</span>' : ''}
         `;
 
-        cell.onclick = () => toast(`Post ${i + 1} — ${fmt(post.likesCount || 0)} likes`, "info", 2000);
+        cell.onclick = () => toast(`Post ${i + 1} — ${fmt(post.likeCount || 0)} likes`, "info", 2000);
         g.appendChild(cell);
       });
     }
@@ -951,7 +951,7 @@ console.log("Backend message : ",data.message);// 👈 यहाँ डालन
       row.innerHTML = highlights.map((h, i) => `
         <div class="highlight-item" onclick="toast('${h.name} story','info',2000)">
           <div class="highlight-ring">
-            <img src="${h.coverImage ? BASE + h.coverImage : `https://picsum.photos/seed/hl${i}/80/80`}" alt="${h.name}">
+            <img src="${h.coverImage ?  + h.coverImage : `https://picsum.photos/seed/hl${i}/80/80`}" alt="${h.name}">
           </div>
           <span class="highlight-name">${h.name}</span>
         </div>
@@ -965,13 +965,14 @@ console.log("Backend message : ",data.message);// 👈 यहाँ डालन
       showSkeleton();
 
       try {
-        const res = await fetch(`${BASE}/user/post/getUserProfile/${USER_ID}`, {
+        const res = await fetch(`/user/post/getUserProfile/${USER_ID}`, {
           credentials: "include"
         });
 
         if (!res.ok) throw new Error(`Server responded with ${res.status}`);
 
         const data = await res.json();
+        console.log("Responsse ",data);
 
         // Populate UI
         document.getElementById("username").textContent    = data.username || "Unknown";
@@ -991,7 +992,7 @@ console.log("Backend message : ",data.message);// 👈 यहाँ डालन
         document.getElementById("statFollowing").textContent = fmt(data.followingCount || 0);
 
         if (data.profilePic) {
-          document.getElementById("profilePic").src = BASE + data.profilePic;
+          document.getElementById("profilePic").src = data.profilePic;
         }
 
         if (!data.verified) document.getElementById("verifiedBadge").style.display = "none";
