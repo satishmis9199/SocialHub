@@ -804,7 +804,7 @@
             <div class="notice-points">
                 <div class="notice-item">✅ Designed By Satish Kumar Mishra</div>
                 <div class="notice-item">✅ Faster Dashboard Experience</div>
-                <div class="notice-item">✅ System is in Progress </div>
+                <div class="notice-item">✅ System is Under Progress</div>
                 <div class="notice-item">✅ We are Regret for Any Issue Raised.</div>
                 <div class="notice-item">✅ We are Resolving all Issues on priority.</div>
             </div>
@@ -993,7 +993,7 @@
 
         const data = JSON.parse(message.body);
 
-        toast(`❤️ ${data.message} , 'success', 4000);
+        toast(`❤️ ${data.senderUsername} liked a post!`, 'success', 4000);
 
         document.getElementById('notifDot').style.display       = 'block';
         document.getElementById('mnav-notif-dot').style.display = 'block';
