@@ -50,7 +50,6 @@ public class RegisterRestController {
         );
     }
 
-    @PutMapping
 
     // ✅ Admin endpoint tracing
     @Observed(name = "get-all-users")
