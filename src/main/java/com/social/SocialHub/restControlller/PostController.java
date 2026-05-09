@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/user/post")
 public class PostController {
+    private final SimpMessagingTemplate messagingTemplate;
     private static final Logger logger= LoggerFactory.getLogger(PostController.class);
 
     private final PostService postService;
@@ -35,7 +37,8 @@ public class PostController {
     private final UserRepository userRepository;
 
 
-    public PostController(PostService postService, LikeService likeService, UserRepository userRepository) {
+    public PostController(SimpMessagingTemplate messagingTemplate, PostService postService, LikeService likeService, UserRepository userRepository) {
+        this.messagingTemplate = messagingTemplate;
         this.postService = postService;
         this.likeService = likeService;
         this.userRepository = userRepository;
@@ -162,5 +165,23 @@ public class PostController {
     @GetMapping("/getallUser")
     public List<UserEntity> getall(){
         return userRepository.findAll();
+    }
+    @GetMapping("/socket-test")
+    public String socketTest() {
+
+        System.out.println(
+                "TEST SOCKET API HIT"
+        );
+
+        messagingTemplate.convertAndSend(
+                "/topic/notifications",
+                "NEW_NOTIFICATION"
+        );
+
+        System.out.println(
+                "TEST SOCKET SENT"
+        );
+
+        return "DONE";
     }
 }

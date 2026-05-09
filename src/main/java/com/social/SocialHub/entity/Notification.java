@@ -1,6 +1,7 @@
 package com.social.SocialHub.entity;
 
 
+import com.social.SocialHub.dto.EntityType;
 import com.social.SocialHub.entity.NotificationPriority;
 import com.social.SocialHub.entity.NotificationType;
 import jakarta.persistence.*;
@@ -63,9 +64,9 @@ public class Notification {
     @Column(name = "entity_id")
     private UUID entityId;
 
-
-    @Column(name = "entity_type", length = 50)
-    private String entityType;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private EntityType entityType;
 
     /**
      * Read/unread state
