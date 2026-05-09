@@ -1539,14 +1539,36 @@ window.addEventListener("load", () => {
  }
 
  function timeAgo(ts) {
-   if (!ts) return "";
-   const d = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
-   if (d < 60)   return `${d}s`;
-   if (d < 3600) return `${Math.floor(d/60)}m`;
-   if (d < 86400)return `${Math.floor(d/3600)}h`;
-   return `${Math.floor(d/86400)}d`;
- }
 
+   if (!ts) return "";
+
+   const created = new Date(ts).getTime();
+
+   const now = Date.now();
+
+   const diff = Math.floor((now - created) / 1000);
+
+   console.log("TIME DEBUG =", {
+      ts,
+      created,
+      now,
+      diff
+   });
+
+   if (diff < 60) {
+      return `${diff}s`;
+   }
+
+   if (diff < 3600) {
+      return `${Math.floor(diff / 60)}m`;
+   }
+
+   if (diff < 86400) {
+      return `${Math.floor(diff / 3600)}h`;
+   }
+
+   return `${Math.floor(diff / 86400)}d`;
+}
  /* ═══════════════════════════════════════
     NAVIGATION
  ═══════════════════════════════════════ */
