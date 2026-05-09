@@ -426,11 +426,11 @@ public class PostService {
         for (Post post : posts) {
 
             String thumbnail = mediaMap.get(post.getId());
-            logger.error("Url in loggedin UserPost {}",url+thumbnail);// null ho sakta hai
+            logger.error("Url in loggedin UserPost {}",thumbnail);// null ho sakta hai
 
             ProfilePostDTOResponse dto = ProfilePostDTOResponse.builder()
                     .id(post.getId())
-                    .thumbnail(url+thumbnail)
+                    .thumbnail(thumbnail)
                     .likesCount((long) post.getLikeCount())
                     .commentsCount((long) post.getCommentCount())
                     .build();
