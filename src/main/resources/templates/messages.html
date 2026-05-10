@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SocialHub — Messages</title>
+    <title>SnapSphere — Messages</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
@@ -510,7 +510,7 @@
 <!-- ── TOPBAR ── -->
 <header class="topbar">
     <button class="back-btn" id="backBtn" onclick="goBackToList()">←</button>
-    <div class="topbar-logo">SocialHub</div>
+    <div class="topbar-logo">SnapSphere</div>
     <div class="topbar-title" id="topbarTitle">Messages</div>
     <div class="topbar-search">
         <span class="search-icon">🔍</span>
@@ -1048,7 +1048,7 @@ stompClient.subscribe(
       const box  = document.getElementById('chatBox');
       box.innerHTML = `<div class="date-sep">Today</div>`;
       const demos = [
-        { senderUsername:'aryan.dev',  message:'Bhai yeh SocialHub project mast chal raha hai!', createdAt: new Date(Date.now()-3600000).toISOString(), seen:true },
+        { senderUsername:'aryan.dev',  message:'Bhai yeh SnapSphere project mast chal raha hai!', createdAt: new Date(Date.now()-3600000).toISOString(), seen:true },
         { senderUsername: loggedInUsername || 'me', message:'Haan yaar, UI bhi complete ho gayi ab!', createdAt: new Date(Date.now()-3500000).toISOString(), seen:true },
         { senderUsername:'aryan.dev',  message:'Messages page v ekdm fire lag raha hai 🔥', createdAt: new Date(Date.now()-3400000).toISOString(), seen:true },
         { senderUsername: loggedInUsername || 'me', message:'Thanks bhai! WebSocket bhi kaam kar raha hai ab ✅', createdAt: new Date(Date.now()-60000).toISOString(), seen:false },

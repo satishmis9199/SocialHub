@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>SocialHub | Login</title>
+    <title>SnapSphere | Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -566,7 +566,7 @@
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
             </div>
-            <div class="logo-name">SocialHub</div>
+            <div class="logo-name">SnapSphere</div>
             <div class="logo-sub">Welcome back 👋 Login to continue</div>
         </div>
 
@@ -735,7 +735,12 @@
       fetch('/api/login', {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+
+   'Content-Type': 'application/json',
+
+   'X-Requested-With':'XMLHttpRequest'
+},
         body: JSON.stringify({ email, password: pwd })
       })
       .then(async res => {
@@ -746,7 +751,19 @@
           return;
         }
         showMessage(data.message || 'Login successful! Redirecting…', 'success');
-        setTimeout(() => { window.location.href = '/user/dashboard'; }, 900);
+       setTimeout(() => {
+
+   // agar backend redirect url bheje
+   if(data.redirectUrl){
+
+      window.location.href = data.redirectUrl;
+
+   }else{
+
+      window.location.href = '/user/dashboard';
+   }
+
+}, 900);
       })
       .catch(() => {
         showMessage('Something went wrong. Try again.', 'error');

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SocialHub — Feed</title>
+    <title>SnapSphere — Feed</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
@@ -647,7 +647,7 @@
 
 <!-- ─── SCREEN LOADER ─── -->
 <div id="screenLoader">
-    <div class="loader-logo">SocialHub</div>
+    <div class="loader-logo">SnapSphere</div>
     <div class="spin-ring"></div>
 </div>
 
@@ -657,7 +657,7 @@
 <!-- ─── NAVBAR ─── -->
 <nav class="navbar">
     <div class="nav-inner">
-        <span class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">SocialHub</span>
+        <span class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">SnapSphere</span>
         <div class="search-wrap">
             <span class="search-icon">🔍</span>
             <input type="text" placeholder="Search people, posts…" id="searchInput" oninput="onSearch(this.value)"/>
@@ -744,12 +744,12 @@
             </div>
             <div class="suggestion-item">
                 <img class="sugg-avatar" src="https://i.pravatar.cc/80?img=22" alt=""/>
-                <div class="sugg-info"><div class="sugg-name">@ui_queen</div><div class="sugg-sub">New to SocialHub</div></div>
+                <div class="sugg-info"><div class="sugg-name">@ui_queen</div><div class="sugg-sub">New to SnapSphere</div></div>
                 <button class="sugg-follow" onclick="this.textContent='Following';this.style.color='var(--txt3)';toast('Followed!','success',2000)">Follow</button>
             </div>
             <div class="suggestion-item">
                 <img class="sugg-avatar" src="https://i.pravatar.cc/80?img=33" alt=""/>
-                <div class="sugg-info"><div class="sugg-name">@codemaster</div><div class="sugg-sub">Popular on SocialHub</div></div>
+                <div class="sugg-info"><div class="sugg-name">@codemaster</div><div class="sugg-sub">Popular on SnapSphere</div></div>
                 <button class="sugg-follow" onclick="this.textContent='Following';this.style.color='var(--txt3)';toast('Followed!','success',2000)">Follow</button>
             </div>
         </div>
@@ -773,7 +773,7 @@
             </div>
         </div>
         <div style="font-size:11px;color:var(--txt3);padding:0 4px;line-height:1.7;">
-            © 2025 SocialHub ·
+            © 2025 SnapSphere ·
             <span style="cursor:pointer;text-decoration:underline">Privacy</span> ·
             <span style="cursor:pointer;text-decoration:underline">Terms</span>
         </div>
@@ -799,7 +799,7 @@
             <button class="notice-close" onclick="closeNoticeModal()">✕</button>
         </div>
         <div class="notice-content">
-            <h2>Welcome to SocialHub 🚀</h2>
+            <h2>Welcome to SnapSphere 🚀</h2>
             <p>Hi All, This is a Social Media Platform... Keep posting and Enjoy here.</p>
             <div class="notice-points">
                 <div class="notice-item">✅ Designed By Satish Kumar Mishra</div>
@@ -1185,7 +1185,7 @@
     function loadDemoPost() {
       if (postIndex > 0) return;
       const demo = [
-        { postId:'d1', userId:'u1', username:'aryan.dev',  verified:true,  profilePic:`https://i.pravatar.cc/80?img=32`, likeCount:1248, commentCount:84,  caption:'Just shipped a major UI update 🚀 Mobile-first, dark mode, buttery animations — this is the future of SocialHub. What do you think?', media:[{type:'IMAGE',url:'https://picsum.photos/seed/a1/600/750'}], createdAt:new Date(Date.now()-3600000).toISOString() },
+        { postId:'d1', userId:'u1', username:'aryan.dev',  verified:true,  profilePic:`https://i.pravatar.cc/80?img=32`, likeCount:1248, commentCount:84,  caption:'Just shipped a major UI update 🚀 Mobile-first, dark mode, buttery animations — this is the future of SnapSphere. What do you think?', media:[{type:'IMAGE',url:'https://picsum.photos/seed/a1/600/750'}], createdAt:new Date(Date.now()-3600000).toISOString() },
         { postId:'d2', userId:'u2', username:'ui_queen',   verified:false, profilePic:`https://i.pravatar.cc/80?img=44`, likeCount:892,  commentCount:31,  caption:'Design systems are the backbone of every great product. Consistency beats creativity every time. 🎨', media:[{type:'IMAGE',url:'https://picsum.photos/seed/b2/600/750'}], createdAt:new Date(Date.now()-7200000).toISOString() },
         { postId:'d3', userId:'u3', username:'codemaster', verified:false, profilePic:`https://i.pravatar.cc/80?img=55`, likeCount:2100, commentCount:153, caption:'Spring Boot + WebSockets = realtime magic ✨ #java #springboot #backend', media:[{type:'IMAGE',url:'https://picsum.photos/seed/c3/600/750'}], createdAt:new Date(Date.now()-18000000).toISOString() },
       ];
@@ -1264,7 +1264,7 @@
     ═══════════════════════════════════════ */
     function sharePost(postId) {
       const url = `${location.origin}/post/${postId}`;
-      if (navigator.share) { navigator.share({ title:'SocialHub', url }).catch(()=>{}); }
+      if (navigator.share) { navigator.share({ title:'SnapSphere', url }).catch(()=>{}); }
       else { navigator.clipboard.writeText(url).then(() => toast('Link copied!', 'success', 2000)); }
     }
 

@@ -575,7 +575,7 @@
       FOLLOWING:     '/user/following',             // GET  → { users: [...], count }
      TOGGLE_FOLLOW:  '/user/follow/toggle',
       ACTIVITY:      '/user/activity',              // GET  → { activities: [{type, message, time}] }
-      LOGOUT:        '/auth/logout',                // POST → end session
+      LOGOUT:        '/api/logout',                // POST → end session
     };
 
     /* ══════════════════════════════════════════════════
@@ -861,7 +861,7 @@ console.log("PROFILE DATA =", d);
     async function logout() {
       if (!confirm('Do you want to Logout?')) return;
       try { await fetch(API.LOGOUT, { method: 'POST', credentials: 'include' }); } catch(e){}
-      window.location.href = '/login';
+      window.location.href = '/api/login';
     }
 
     /* ══════════════════════════════════════════════════
