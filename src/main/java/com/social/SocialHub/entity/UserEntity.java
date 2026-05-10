@@ -236,7 +236,19 @@ public class UserEntity {
     private boolean isLocked = false;
 
     private boolean isDeleted = false;
+    // =====================================================
+// UserEntity.java
+// =====================================================
 
+    private String fcmToken;
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
 
     // 🔹 Security
     private int loginAttempts = 0;

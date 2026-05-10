@@ -1,5 +1,6 @@
 package com.social.SocialHub.EvenentListener;
 
+import com.social.SocialHub.controller.OnlineUsers;
 import com.social.SocialHub.dto.EntityType;
 import com.social.SocialHub.dto.PostLikedEvent;
 import com.social.SocialHub.entity.Notification;
@@ -7,6 +8,7 @@ import com.social.SocialHub.entity.NotificationType;
 import com.social.SocialHub.entity.UserEntity;
 import com.social.SocialHub.repository.NotificationRepository;
 import com.social.SocialHub.repository.UserRepository;
+import com.social.SocialHub.service.FirebaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -20,6 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationEventListener {
+    private final FirebaseService firebaseService;
 
     private final UserRepository userRepository;
 
@@ -131,5 +134,35 @@ public class NotificationEventListener {
                 "REALTIME NOTIFICATION SENT TO = {}",
                 receiver.getEmail()
         );
+
+
+
+        if(
+
+                !OnlineUsers
+                        .ONLINE_USERS
+                        .contains(
+                                receiver.getUsername()
+                        )
+
+                        &&
+
+                        receiver.getFcmToken() != null
+        ){
+
+            firebaseService.sendPushNotification(
+
+                    receiver.getFcmToken(),
+
+                    sender.getUsername(),
+                   sender.getUsername()
+                            + " liked your post"
+            );
+
+            log.error(
+                    "FIREBASE PUSH SENT TO = {}",
+                    receiver.getUsername()
+            );
+        }
     }
 }

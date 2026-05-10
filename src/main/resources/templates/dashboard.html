@@ -1356,5 +1356,202 @@
     loadStories();
     loadPosts();
 </script>
+<script type="module">
+
+    import { initializeApp }
+
+    from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+
+    import {
+
+        getMessaging,
+
+        getToken,
+
+        onMessage
+
+    }
+
+    from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
+
+    // =====================================================
+    // FIREBASE CONFIG
+    // =====================================================
+
+ const firebaseConfig = {
+  apiKey: "AIzaSyCaJwjoJlTX1obtpitIMO5gvlXRQo10hz8",
+  authDomain: "snapsphere-d995e.firebaseapp.com",
+  projectId: "snapsphere-d995e",
+  storageBucket: "snapsphere-d995e.firebasestorage.app",
+  messagingSenderId: "994505577881",
+  appId: "1:994505577881:web:f8f3a5789a8c0c8a0eaf08"
+};
+
+    // =====================================================
+    // FIREBASE INIT
+    // =====================================================
+
+    const app =
+        initializeApp(firebaseConfig);
+
+    const messaging =
+        getMessaging(app);
+
+    // =====================================================
+    // INIT FCM
+    // =====================================================
+
+    async function initFCM(){
+
+        try{
+
+            console.log(
+                "INIT FCM"
+            );
+
+            const permission =
+
+                await Notification
+                        .requestPermission();
+
+            console.log(
+                "PERMISSION = ",
+                permission
+            );
+
+            if(permission !== 'granted'){
+
+                return;
+            }
+
+            // =============================================
+            // REGISTER SERVICE WORKER
+            // =============================================
+
+            const registration =
+
+                await navigator
+                        .serviceWorker
+                        .register(
+                            '/firebase-messaging-sw.js'
+                        );
+
+            console.log(
+                "SERVICE WORKER REGISTERED"
+            );
+
+            // =============================================
+            // GENERATE TOKEN
+            // =============================================
+
+            const token =
+
+                await getToken(
+
+                    messaging,
+
+                    {
+
+                        vapidKey:
+                        'BMmSfeDWd09s4TsLc_kiGvAsIEpvZyiDWWWz5v8orFiDjzfn506hQ7iatROHQPLMgbyQVc4u7WTpBjDG3z-DCGk',
+
+                        serviceWorkerRegistration:
+                        registration
+                    }
+                );
+
+            console.log(
+                "FCM TOKEN = ",
+                token
+            );
+
+            if(!token){
+
+                return;
+            }
+
+            // =============================================
+            // SAVE TOKEN BACKEND
+            // =============================================
+
+            await fetch(
+
+                '/save-fcm-token',
+
+                {
+
+                    method:'POST',
+
+                    headers:{
+
+                        'Content-Type':
+                        'application/json'
+                    },
+
+                    credentials:'include',
+
+                    body:JSON.stringify({
+
+                        token:token
+                    })
+                }
+            );
+
+            console.log(
+                "TOKEN SAVED"
+            );
+
+        }catch(error){
+
+            console.error(
+                "FCM ERROR",
+                error
+            );
+        }
+    }
+
+    // =====================================================
+    // FOREGROUND MESSAGE
+    // =====================================================
+
+    onMessage(
+
+        messaging,
+
+        (payload) => {
+
+            console.log(
+                "FOREGROUND MESSAGE",
+                payload
+            );
+
+            new Notification(
+
+                payload.notification.title,
+
+                {
+
+                    body:
+                        payload.notification.body
+                }
+            );
+        }
+    );
+
+    // =====================================================
+    // PAGE LOAD
+    // =====================================================
+
+    window.addEventListener(
+
+        'load',
+
+        () => {
+
+            initFCM();
+        }
+    );
+
+</script>
 </body>
 </html>
