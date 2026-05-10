@@ -3,17 +3,22 @@ package com.social.SocialHub.restControlller;
 import com.social.SocialHub.dto.LoginRequestDTO;
 import com.social.SocialHub.security.JwtUtil;
 import com.social.SocialHub.service.CustomUserDetail;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -21,57 +26,90 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class AuthController {
-    private static  final Logger logger= LoggerFactory.getLogger(AuthController.class);
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(AuthController.class);
 
     private final AuthenticationManager authenticationManager;
+
     private final JwtUtil jwtUtil;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(
+            AuthenticationManager authenticationManager,
+            JwtUtil jwtUtil
+    ) {
+
+        this.authenticationManager =
+                authenticationManager;
+
         this.jwtUtil = jwtUtil;
     }
 
+    // =====================================================
+    // LOGIN
+    // =====================================================
     @PostMapping("/login")
     public ResponseEntity<?> login(
+
             @RequestBody LoginRequestDTO dto,
-            HttpServletResponse response,
-            jakarta.servlet.http.HttpServletRequest request
+
+            HttpServletRequest request,
+
+            HttpServletResponse response
     ) {
 
         try {
 
-            // =====================================
-            // AUTHENTICATE
-            // =====================================
+            // =============================================
+            // AUTHENTICATE USER
+            // =============================================
             Authentication auth =
+
                     authenticationManager.authenticate(
 
                             new UsernamePasswordAuthenticationToken(
+
                                     dto.getEmail(),
+
                                     dto.getPassword()
                             )
                     );
 
+            // =============================================
+            // USER DETAILS
+            // =============================================
             CustomUserDetail user =
+
                     (CustomUserDetail) auth.getPrincipal();
 
-            // =====================================
-            // GENERATE JWT
-            // =====================================
-            String token = jwtUtil.generateToken(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getRole().name()
+            logger.info(
+                    "✅ LOGIN SUCCESS : {}",
+                    user.getUsername()
             );
 
-            logger.info("ROLE = {}", user.getRole());
+            // =============================================
+            // GENERATE JWT
+            // =============================================
+            String token =
 
-            // =====================================
-            // COOKIE
-            // =====================================
-            Cookie cookie = new Cookie("token", token);
+                    jwtUtil.generateToken(
+
+                            user.getId(),
+
+                            user.getUsername(),
+
+                            user.getRole().name()
+                    );
+
+            // =============================================
+            // JWT COOKIE
+            // =============================================
+            Cookie cookie =
+                    new Cookie("token", token);
 
             cookie.setHttpOnly(true);
+
+            cookie.setSecure(false);
 
             cookie.setPath("/");
 
@@ -79,49 +117,49 @@ public class AuthController {
 
             response.addCookie(cookie);
 
-            // =====================================
-            // SAVED URL
-            // =====================================
-            org.springframework.security.web.savedrequest
-                    .SavedRequest savedRequest =
+            // =============================================
+            // REDIRECT URL
+            // =============================================
+            String redirectUrl =
+                    request.getParameter("continue");
 
-                    new org.springframework.security.web
-                            .savedrequest
-                            .HttpSessionRequestCache()
-
-                            .getRequest(request, response);
-
-            String redirectUrl = "/user/dashboard";
-
-            if (savedRequest != null) {
+            if (
+                    redirectUrl == null
+                            || redirectUrl.isBlank()
+            ) {
 
                 redirectUrl =
-                        savedRequest.getRedirectUrl();
-
-                logger.info(
-                        "REDIRECT URL = {}",
-                        redirectUrl
-                );
+                        "/user/dashboard";
             }
 
-            // =====================================
+            logger.info(
+                    "➡️ REDIRECT URL : {}",
+                    redirectUrl
+            );
+
+            // =============================================
             // RESPONSE
-            // =====================================
+            // =============================================
             return ResponseEntity.ok(
 
                     Map.of(
 
                             "success", true,
 
-                            "message", "Login Successful",
+                            "message",
+                            "Login Successful",
 
-                            "redirectUrl", redirectUrl
+                            "redirectUrl",
+                            redirectUrl
                     )
             );
 
         } catch (Exception e) {
 
-            logger.error("LOGIN ERROR", e);
+            logger.error(
+                    "❌ LOGIN ERROR",
+                    e
+            );
 
             return ResponseEntity
                     .status(401)
@@ -137,45 +175,100 @@ public class AuthController {
                     );
         }
     }
+
+    // =====================================================
+    // LOGOUT
+    // =====================================================
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
+
             HttpServletRequest request,
+
             HttpServletResponse response
     ) {
 
+        logger.info("🚪 LOGOUT");
+
+        // =============================================
+        // CLEAR SECURITY CONTEXT
+        // =============================================
         SecurityContextHolder.clearContext();
 
-        HttpSession session = request.getSession(false);
+        // =============================================
+        // INVALIDATE SESSION
+        // =============================================
+        HttpSession session =
+                request.getSession(false);
 
-        if(session != null){
+        if (session != null) {
+
             session.invalidate();
         }
 
-        Cookie cookie = new Cookie("token", "");
+        // =============================================
+        // DELETE JWT COOKIE
+        // =============================================
+        Cookie jwtCookie =
+                new Cookie("token", "");
 
-        cookie.setHttpOnly(true);
+        jwtCookie.setHttpOnly(true);
 
-        cookie.setSecure(false);
+        jwtCookie.setSecure(false);
 
-        cookie.setPath("/");
+        jwtCookie.setPath("/");
 
-        cookie.setMaxAge(0);
+        jwtCookie.setMaxAge(0);
 
-        response.addCookie(cookie);
+        response.addCookie(jwtCookie);
 
+        // =============================================
+        // DELETE JSESSIONID
+        // =============================================
+        Cookie sessionCookie =
+                new Cookie("JSESSIONID", "");
+
+        sessionCookie.setHttpOnly(true);
+
+        sessionCookie.setSecure(false);
+
+        sessionCookie.setPath("/");
+
+        sessionCookie.setMaxAge(0);
+
+        response.addCookie(sessionCookie);
+
+        // =============================================
+        // CACHE CLEAR
+        // =============================================
         response.setHeader(
                 "Cache-Control",
                 "no-cache, no-store, must-revalidate"
         );
 
-        response.setHeader("Pragma", "no-cache");
+        response.setHeader(
+                "Pragma",
+                "no-cache"
+        );
 
-        response.setHeader("Expires", "0");
+        response.setHeader(
+                "Expires",
+                "0"
+        );
 
+        // =============================================
+        // RESPONSE
+        // =============================================
         return ResponseEntity.ok(
+
                 Map.of(
+
                         "success", true,
-                        "redirectUrl", "/api/login"
+
+                        "message",
+                        "Logout Successful",
+
+                        "redirectUrl",
+                        "/api/login"
                 )
         );
     }
