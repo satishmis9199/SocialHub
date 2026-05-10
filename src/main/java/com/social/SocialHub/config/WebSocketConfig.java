@@ -1,8 +1,14 @@
 package com.social.SocialHub.config;
 
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.*;
+
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -10,14 +16,24 @@ public class WebSocketConfig
         implements WebSocketMessageBrokerConfigurer {
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
+    public void configureMessageBroker(
+            MessageBrokerRegistry registry
+    ) {
 
         registry.enableSimpleBroker(
-                "/topic",  // ✅ yeh add karo — sabko broadcast ke liye
-                "/queue"   // user-specific ke liye
+
+                "/topic",
+
+                "/queue"
         );
 
-        registry.setUserDestinationPrefix("/user");
+        registry.setApplicationDestinationPrefixes(
+                "/app"
+        );
+
+        registry.setUserDestinationPrefix(
+                "/user"
+        );
     }
 
     @Override
@@ -26,7 +42,9 @@ public class WebSocketConfig
     ) {
 
         registry.addEndpoint("/ws")
+
                 .setAllowedOriginPatterns("*")
+
                 .withSockJS();
     }
 }

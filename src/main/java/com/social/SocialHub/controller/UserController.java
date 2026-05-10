@@ -32,4 +32,8 @@ public class UserController {
     public String getMyProfile(){
         return "my-profile";
     }
+    @GetMapping("/messages")
+    public String getMessage(){
+        return "messages";
+    }
 }

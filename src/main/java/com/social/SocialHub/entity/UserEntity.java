@@ -249,7 +249,23 @@ public class UserEntity {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+    private LocalDateTime lastSeen;
 
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public LocalDateTime getLastSeen() {
+        return lastSeen;
+    }
+
+    public void setLastSeen(LocalDateTime lastSeen) {
+        this.lastSeen = lastSeen;
+    }
 
     @PrePersist
     public void onCreate() {

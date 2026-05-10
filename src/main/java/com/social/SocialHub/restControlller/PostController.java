@@ -161,27 +161,18 @@ public class PostController {
 
 
 
-    /// ////Testing
+
+
     @GetMapping("/getallUser")
-    public List<UserEntity> getall(){
-        return userRepository.findAll();
-    }
-    @GetMapping("/socket-test")
-    public String socketTest() {
+    public ResponseEntity<List<UserMessageResponse>>
+    getall(){
 
-        System.out.println(
-                "TEST SOCKET API HIT"
-        );
+        List<UserMessageResponse>
+                messageResponses =
 
-        messagingTemplate.convertAndSend(
-                "/topic/notifications",
-                "NEW_NOTIFICATION"
-        );
+                postService.getALlUser();
 
-        System.out.println(
-                "TEST SOCKET SENT"
-        );
-
-        return "DONE";
+        return ResponseEntity
+                .ok(messageResponses);
     }
 }

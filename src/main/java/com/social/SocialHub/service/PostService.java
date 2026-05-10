@@ -1,5 +1,6 @@
 package com.social.SocialHub.service;
 
+import com.social.SocialHub.controller.OnlineUsers;
 import com.social.SocialHub.dto.*;
 import com.social.SocialHub.entity.*;
 import com.social.SocialHub.repository.*;
@@ -30,13 +31,14 @@ public class PostService {
     private final MediaService mediaService;
     private final UserRepository userRepository;
     private final PostLikeRepository postLikeRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     public PostService(FollowRepository followRepository, CommentRepository commentRepository,
                        PostRepository postRepository,
                        PostMediaRepository postMediaRepository,
                        MediaService mediaService,
                        UserRepository userRepository,
-                       PostLikeRepository postLikeRepository) {
+                       PostLikeRepository postLikeRepository, ChatMessageRepository chatMessageRepository) {
         this.followRepository = followRepository;
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
@@ -44,6 +46,7 @@ public class PostService {
         this.mediaService = mediaService;
         this.userRepository = userRepository;
         this.postLikeRepository = postLikeRepository;
+        this.chatMessageRepository = chatMessageRepository;
     }
 
     public String getBaseUrl(HttpServletRequest request) {
@@ -439,5 +442,127 @@ public class PostService {
         }
 
         return responseList;
+    }
+
+    public List<UserMessageResponse> getALlUser() {
+
+        try {
+
+            UserEntity currentUser=getLoggedInUser();
+
+            List<UserEntity> users =
+                    userRepository.findAll();
+
+            List<UserMessageResponse>
+                    userMessageResponses =
+                    new ArrayList<>();
+
+            for(UserEntity u1 : users){
+
+                if(
+                        u1.getId()
+                                .equals(
+                                        currentUser.getId()
+                                )
+                ){
+                    continue;
+                }
+
+                boolean online =
+
+                        OnlineUsers
+                                .ONLINE_USERS
+                                .contains(
+                                        u1.getUsername()
+                                );
+
+                int count =
+
+                        chatMessageRepository
+                                .countBySenderIdAndReceiverIdAndSeenFalse(
+
+                                        u1.getId(),
+
+                                        currentUser.getId()
+                                );
+
+                Optional<ChatMessage> lastMessageOptional =
+
+                        chatMessageRepository
+
+                                .findTopBySenderIdAndReceiverIdOrSenderIdAndReceiverIdOrderByCreatedAtDesc(
+
+                                        currentUser.getId(),
+
+                                        u1.getId(),
+
+                                        u1.getId(),
+
+                                        currentUser.getId()
+                                );
+
+                String lastMessage = "";
+
+                if(lastMessageOptional.isPresent()){
+
+                    lastMessage =
+
+                            lastMessageOptional
+                                    .get()
+                                    .getMessage();
+                }
+
+                UserMessageResponse u =
+
+                        UserMessageResponse
+                                .builder()
+
+                                .id(
+                                        u1.getId()
+                                )
+
+                                .username(
+                                        u1.getUsername()
+                                )
+
+                                .profilePic(
+                                        u1.getProfilePic()
+                                )
+
+                                .online(
+                                        online
+                                )
+
+                                .unreadCount(
+                                        count
+                                )
+
+                                .lastSeen(
+                                        u1.getLastSeen()
+                                )
+
+                                .lastMessage(
+                                        lastMessage
+                                )
+
+                                .build();
+
+                userMessageResponses
+                        .add(u);
+            }
+
+            return userMessageResponses;
+
+        } catch(Exception e){
+
+            e.printStackTrace();
+
+            logger.error(
+                    "Error while geeting user :: {}",
+                    e.getMessage()
+            );
+
+            return Collections.emptyList();
+        }
     }
 }
