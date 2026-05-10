@@ -836,8 +836,8 @@
         <div class="comments-list" id="commentsList"></div>
         <div class="comment-input-row">
             <img class="ci-my-avatar" src="https://i.pravatar.cc/60?img=32" alt=""/>
-            <input class="ci-field" id="commentText" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')addComment()"/>
-            <button class="ci-send-btn" onclick="addComment()">Post</button>
+            <input class="ci-field" id="commentText" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')addComment(event)"/>
+            <button class="ci-send-btn" onclick="addComment(event)">Post</button>
         </div>
     </div>
 </div>
@@ -1113,11 +1113,25 @@
       </div>
 
       <div class="quick-comment">
-        <img class="qc-avatar" src="https://i.pravatar.cc/60?img=32" alt=""/>
-        <input class="qc-input" placeholder="Add a comment…"
-               onkeydown="if(event.key==='Enter'&&this.value.trim()){quickComment('${p.postId}',this);}"/>
-        <button class="qc-send">Post</button>
-      </div>
+
+   <img class="qc-avatar"
+        src="https://i.pravatar.cc/60?img=32"
+        alt=""/>
+
+   <input
+      class="qc-input"
+      id="qc-${p.postId}"
+      placeholder="Add a comment…"
+      onkeydown="if(event.key==='Enter'&&this.value.trim()){quickComment('${p.postId}', this);}"
+   />
+
+   <button
+      class="qc-send"
+      onclick="quickComment('${p.postId}', document.getElementById('qc-${p.postId}'))">
+      Post
+   </button>
+
+</div>
     </div>`;
     }
 
@@ -1288,6 +1302,9 @@
       const list = document.getElementById('commentsList');
       list.innerHTML = `<div style="color:var(--txt3);font-size:13px;text-align:center;padding:20px;">Loading…</div>`;
       document.getElementById('commentModal').classList.add('open');
+console.log("OPEN COMMENTS CALLED");
+
+   console.log("POST ID =", postId);
 
       try {
         const res  = await fetch(`/user/post/comments/${postId}`, { credentials:'include' });
@@ -1319,22 +1336,79 @@
       }
     }
 
-    async function addComment() {
-      const input = document.getElementById('commentText');
-      const val   = input.value.trim();
-      if (!val) return;
-      try {
-        const res = await fetch('/api/comment', {
-          method:'POST', credentials:'include',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ postId: currentPostId, text: val })
-        });
-        if (!res.ok) throw new Error('Failed');
-        input.value = '';
-        openComments(currentPostId); // refresh list
-        toast('Comment posted!', 'success');
-      } catch(err) { toast('Failed to post comment', 'error'); }
-    }
+    async function addComment(e) {
+
+   if(e) e.preventDefault();
+
+   console.log("COMMENT FUNCTION CALLED");
+
+   console.log("CURRENT POST ID =", currentPostId);
+
+   const input = document.getElementById('commentText');
+
+   console.log("INPUT =", input);
+
+   const val = input.value.trim();
+
+   console.log("TEXT =", val);
+
+   if (!val) {
+      console.log("EMPTY COMMENT");
+      return;
+   }
+
+   if (!currentPostId) {
+
+      console.log("POST ID NULL");
+
+      toast('Post ID missing', 'error');
+
+      return;
+   }
+
+   try {
+
+      console.log("SENDING REQUEST");
+
+      const res = await fetch('/user/post/comments', {
+
+         method:'POST',
+
+         credentials:'include',
+
+         headers:{
+            'Content-Type':'application/json'
+         },
+
+         body: JSON.stringify({
+            postId: currentPostId,
+            text: val
+         })
+      });
+
+      console.log("RESPONSE =", res);
+
+      const data = await res.json();
+
+      console.log("DATA =", data);
+
+      if (!res.ok) {
+         throw new Error(data.message || 'Failed');
+      }
+
+      input.value = '';
+
+      openComments(currentPostId);
+
+      toast('Comment posted!', 'success');
+
+   } catch(err) {
+
+      console.error("COMMENT ERROR =", err);
+
+      toast(err.message || 'Failed to post comment', 'error');
+   }
+}
 
     /* ═══════════════════════════════════════
        INFINITE SCROLL
