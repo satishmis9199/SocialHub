@@ -202,7 +202,7 @@
       response.classList.remove("show");
 
       try {
-        const res = await fetch("http://localhost:8081/send-email", {
+        const res = await fetch("/send-email", {
           method: "POST",
           body: formData
         });
