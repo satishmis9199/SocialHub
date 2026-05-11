@@ -511,6 +511,74 @@
           border-radius:99px; padding:8px 14px; color:var(--txt);
           font-size:13.5px; outline:none; transition:var(--trans);
         }
+        /* TIMER BAR */
+.notice-timer{
+    width:100%;
+    height:4px;
+    background:rgba(255,255,255,.06);
+    overflow:hidden;
+}
+
+.notice-progress{
+    width:100%;
+    height:100%;
+    background:linear-gradient(90deg,#ff4d6d,#ff7b00);
+    animation:noticeProgressAnim 5s linear forwards;
+    transform-origin:left;
+}
+
+@keyframes noticeProgressAnim{
+    from{
+        width:100%;
+    }
+    to{
+        width:0%;
+    }
+}
+
+/* COUNTDOWN */
+.notice-countdown{
+    font-size:13px;
+    color:#ffb28f;
+    font-weight:600;
+    animation:pulseText 1s infinite;
+}
+
+@keyframes pulseText{
+    0%{
+        opacity:1;
+    }
+    50%{
+        opacity:.5;
+    }
+    100%{
+        opacity:1;
+    }
+}
+
+/* BUTTON */
+.notice-btn{
+    position:relative;
+    overflow:hidden;
+}
+
+.notice-btn::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:-100%;
+    width:100%;
+    height:100%;
+    background:rgba(255,255,255,.15);
+    transform:skewX(-20deg);
+    animation:btnShine 2s infinite;
+}
+
+@keyframes btnShine{
+    100%{
+        left:120%;
+    }
+}
         .ci-field:focus { border-color:var(--border2); }
         .ci-field::placeholder { color:var(--txt3); }
         .ci-send-btn {
@@ -792,21 +860,85 @@
 </nav>
 
 <!-- ─── NOTICE MODAL ─── -->
+
+<!-- ─── NOTICE MODAL ─── -->
 <div class="notice-overlay" id="noticeModal">
+
     <div class="notice-box">
-        <div class="notice-header">
-            <div class="notice-badge">📢 NOTICE</div>
-            <button class="notice-close" onclick="closeNoticeModal()">✕</button>
+
+        <!-- TOP TIMER -->
+        <div class="notice-timer">
+            <div class="notice-progress"></div>
         </div>
+
+        <div class="notice-header">
+
+            <div class="notice-badge">
+                📢 NOTICE
+            </div>
+
+            <div class="notice-countdown" id="noticeCountdown">
+                Closing in 5s
+            </div>
+
+        </div>
+
         <div class="notice-content">
+
             <h2>Welcome to SnapSphere 🚀</h2>
-            <p>Hi All, This is a Social Media Platform... Keep posting and Enjoy here.</p>
+
+            <p>
+                Hi All, This is a Social Media Platform...
+                Keep posting and Enjoy here.
+            </p>
+
             <div class="notice-points">
-                <div class="notice-item">✅ Designed By Satish Kumar Mishra</div>
-                <div class="notice-item">✅ Faster Dashboard Experience</div>
-                <div class="notice-item">✅ System is Under Progress</div>
-                <div class="notice-item">✅ We are Regret for Any Issue Raised.</div>
-                <div class="notice-item">✅ We are Resolving all Issues on priority.</div>
+
+                <div class="notice-item">
+                    ✅ Designed By Satish Kumar Mishra
+                </div>
+
+                <div class="notice-item">
+                    ✅ Faster Dashboard Experience
+                </div>
+
+                <div class="notice-item">
+                    ✅ System is Under Progress
+                </div>
+
+                <div class="notice-item">
+                    ✅ We are Regret for Any Issue Raised.
+                </div>
+
+                <div class="notice-item">
+                    ✅ We are Resolving all Issues on priority.
+                </div>
+
+            </div>
+        </div>
+
+        <div class="notice-footer">
+
+            <button class="notice-btn"
+                    onclick="closeNoticeModal()">
+
+                Continue →
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+                <div class="notice-footer">
+
+                    <button class="notice-btn"
+                            onclick="redirectDashboard()">
+
+                        Continue to Dashboard →
+                    </button>
+
+                </div>
             </div>
         </div>
         <div class="notice-footer">
@@ -912,12 +1044,66 @@
       if (v.length > 2) toast(`Searching for "${v}"…`, 'info', 1500);
     }
 
-    /* ═══════════════════════════════════════
-       NOTICE MODAL
-    ═══════════════════════════════════════ */
-    function openNoticeModal()  { document.getElementById('noticeModal').classList.add('show'); }
-    function closeNoticeModal() { document.getElementById('noticeModal').classList.remove('show'); }
+   /* ═══════════════════════════════════════
+   NOTICE MODAL
+═══════════════════════════════════════ */
 
+let noticeTimer = null;
+
+let noticeSeconds = 5;
+
+function openNoticeModal(){
+
+    document
+        .getElementById('noticeModal')
+        .classList
+        .add('show');
+
+    noticeSeconds = 5;
+
+    updateNoticeText();
+
+    noticeTimer = setInterval(() => {
+
+        noticeSeconds--;
+
+        updateNoticeText();
+
+        if(noticeSeconds <= 0){
+
+            clearInterval(noticeTimer);
+
+            closeNoticeModal();
+        }
+
+    },1000);
+}
+
+function updateNoticeText(){
+
+    document.getElementById(
+        'noticeCountdown'
+    ).textContent =
+        `Closing in ${noticeSeconds}s`;
+}
+
+function closeNoticeModal(){
+
+    clearInterval(noticeTimer);
+
+    document
+        .getElementById('noticeModal')
+        .classList
+        .remove('show');
+}
+
+function redirectDashboard(){
+
+    closeNoticeModal();
+
+    // redirect dashboard/feed
+    window.location.href = '/user/feed';
+}
     /* ═══════════════════════════════════════
        NOTIFICATION PANEL
        GET /api/notifications
@@ -1421,11 +1607,14 @@ console.log("OPEN COMMENTS CALLED");
     /* ═══════════════════════════════════════
        INIT
     ═══════════════════════════════════════ */
-    window.addEventListener('load', () => {
-      setTimeout(openNoticeModal, 1000);
-      connectNotificationSocket();
-      loadNotifications();
-    });
+   window.addEventListener('load', () => {
+
+    openNoticeModal();
+
+    connectNotificationSocket();
+
+    loadNotifications();
+});
 
     loadStories();
     loadPosts();
