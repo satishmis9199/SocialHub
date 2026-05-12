@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SocialHub — Forgot Password</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg:      #04040f;
+          --card:    rgba(255,255,255,0.038);
+          --border:  rgba(255,255,255,0.08);
+          --border2: rgba(255,255,255,0.15);
+          --accent:  #7c6af7;
+          --accent2: #f76ab4;
+          --accent3: #43e8c8;
+          --grad:    linear-gradient(135deg,#7c6af7,#f76ab4);
+          --txt:     #eeeeff;
+          --txt2:    #8888b0;
+          --txt3:    #4a4a70;
+          --danger:  #f87171;
+          --success: #34d399;
+          --surf2:   rgba(255,255,255,0.055);
+          --font-h:  'Syne', sans-serif;
+          --font-b:  'Outfit', sans-serif;
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+          font-family: var(--font-b);
+          background: var(--bg);
+          color: var(--txt);
+          min-height: 100vh;
+          display: flex; flex-direction: column;
+          overflow-x: hidden;
+        }
+
+        /* ── Ambient orbs ── */
+        .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .orb {
+          position: absolute; border-radius: 50%;
+          filter: blur(90px); mix-blend-mode: screen;
+          animation: orbFloat var(--dur, 18s) ease-in-out infinite alternate;
+        }
+        .orb1 { width:600px;height:380px;background:rgba(124,106,247,0.13);top:-120px;left:-160px;--dur:20s; }
+        .orb2 { width:500px;height:320px;background:rgba(247,106,180,0.10);bottom:-100px;right:-140px;--dur:17s;animation-delay:-7s; }
+        .orb3 { width:300px;height:200px;background:rgba(67,232,200,0.07);top:40%;left:55%;--dur:23s;animation-delay:-12s; }
+        @keyframes orbFloat {
+          0%  { transform: translate(0,0) scale(1); }
+          100%{ transform: translate(30px,25px) scale(1.12); }
+        }
+
+        /* ── Grid bg ── */
+        .grid-bg {
+          position: fixed; inset: 0; z-index: 0; pointer-events: none;
+          background-image:
+            linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+          background-size: 44px 44px;
+          mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+        }
+
+        /* ════════════════════════════
+           HEADER
+        ════════════════════════════ */
+        .navbar {
+          position: relative; z-index: 10;
+          height: 60px; flex-shrink: 0;
+          background: rgba(4,4,15,0.92);
+          backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+          border-bottom: 1px solid var(--border);
+          display: flex; align-items: center;
+          padding: 0 24px; gap: 14px;
+        }
+        .nav-logo {
+          font-family: var(--font-h); font-size: 20px; font-weight: 800;
+          background: var(--grad);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          text-decoration: none; cursor: pointer;
+        }
+        .nav-right { margin-left: auto; display: flex; gap: 8px; }
+        .nav-link {
+          font-size: 13px; font-weight: 500; color: var(--txt2);
+          text-decoration: none; padding: 7px 14px;
+          border: 1px solid var(--border); border-radius: 99px;
+          transition: all .2s;
+        }
+        .nav-link:hover { color: var(--txt); border-color: var(--border2); background: rgba(255,255,255,0.05); }
+
+        /* ════════════════════════════
+           PAGE BODY
+        ════════════════════════════ */
+        .page {
+          position: relative; z-index: 1;
+          flex: 1; display: flex;
+          align-items: center; justify-content: center;
+          padding: 32px 16px;
+        }
+
+        /* ════════════════════════════
+           CARD
+        ════════════════════════════ */
+        .card {
+          width: 100%; max-width: 440px;
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 28px;
+          padding: 44px 40px;
+          backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
+          box-shadow:
+            0 0 0 1px rgba(255,255,255,0.035) inset,
+            0 48px 96px rgba(0,0,0,0.55),
+            0 0 80px rgba(124,106,247,0.06);
+          animation: cardIn .7s cubic-bezier(.22,.68,0,1.2) both;
+        }
+        @keyframes cardIn {
+          from { opacity:0; transform:translateY(32px) scale(0.96); }
+          to   { opacity:1; transform:translateY(0) scale(1); }
+        }
+
+        /* ── Logo ── */
+        .logo-block { text-align: center; margin-bottom: 30px; animation: fadeDown .6s .05s ease both; }
+        @keyframes fadeDown {
+          from { opacity:0; transform:translateY(-12px); }
+          to   { opacity:1; transform:translateY(0); }
+        }
+        .logo-badge {
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 56px; height: 56px; border-radius: 16px; font-size: 26px;
+          background: var(--grad);
+          box-shadow: 0 0 0 1px rgba(255,255,255,0.12) inset, 0 10px 32px rgba(124,106,247,0.35);
+          margin-bottom: 14px;
+          animation: badgePulse 3s ease-in-out infinite;
+        }
+        @keyframes badgePulse {
+          0%,100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.12) inset, 0 10px 32px rgba(124,106,247,0.35); }
+          50%     { box-shadow: 0 0 0 1px rgba(255,255,255,0.12) inset, 0 10px 48px rgba(124,106,247,0.6); }
+        }
+        .logo-name {
+          font-family: var(--font-h); font-size: 26px; font-weight: 800; letter-spacing: -0.5px;
+          background: linear-gradient(120deg, #fff 20%, var(--accent) 60%, var(--accent2));
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .logo-sub { font-size: 13px; color: var(--txt2); margin-top: 5px; }
+
+        /* ── Step Indicator ── */
+        .steps {
+          display: flex; align-items: center; justify-content: center;
+          gap: 0; margin-bottom: 26px;
+          animation: fadeUp .5s .1s ease both;
+        }
+        @keyframes fadeUp {
+          from { opacity:0; transform:translateY(12px); }
+          to   { opacity:1; transform:translateY(0); }
+        }
+        .step-dot {
+          width: 28px; height: 28px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 11px; font-weight: 700;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid var(--border);
+          color: var(--txt3); transition: all .35s;
+          flex-shrink: 0;
+        }
+        .step-dot.active {
+          background: var(--grad); border-color: transparent; color: #fff;
+          box-shadow: 0 0 16px rgba(124,106,247,0.45);
+        }
+        .step-dot.done {
+          background: rgba(67,232,200,0.15);
+          border-color: rgba(67,232,200,0.4); color: var(--accent3);
+        }
+        .step-line {
+          flex: 1; height: 1px; max-width: 40px;
+          background: var(--border); margin: 0 4px; transition: background .4s;
+        }
+        .step-line.done { background: rgba(67,232,200,0.35); }
+
+        /* ── Floating label field ── */
+        .field {
+          position: relative; margin-bottom: 16px;
+          animation: fadeUp .5s var(--d,.2s) ease both;
+        }
+        .field-icon {
+          position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+          font-size: 15px; color: var(--txt3); pointer-events: none;
+          transition: color .25s; z-index: 2;
+        }
+        .field:focus-within .field-icon { color: var(--accent); }
+        .field input {
+          width: 100%; background: var(--surf2); border: 1px solid var(--border);
+          border-radius: 14px; color: var(--txt);
+          font-family: var(--font-b); font-size: 14px;
+          padding: 20px 44px 8px 44px; outline: none;
+          transition: border-color .25s, box-shadow .25s, background .25s;
+        }
+        .field label {
+          position: absolute; left: 44px; top: 50%; transform: translateY(-50%);
+          font-size: 14px; color: var(--txt3); pointer-events: none;
+          transition: all .22s cubic-bezier(.4,0,.2,1);
+        }
+        .field input:focus ~ label,
+        .field input:not(:placeholder-shown) ~ label {
+          top: 10px; transform: translateY(0);
+          font-size: 10px; font-weight: 600; letter-spacing: 0.6px;
+          text-transform: uppercase; color: var(--accent);
+        }
+        .field input::placeholder { color: transparent; }
+        .field input:focus {
+          border-color: var(--accent);
+          background: rgba(124,106,247,0.06);
+          box-shadow: 0 0 0 3px rgba(124,106,247,0.14);
+        }
+        .field input.err { border-color: var(--danger)!important; box-shadow: 0 0 0 3px rgba(248,113,113,0.14)!important; }
+        .field input.ok  { border-color: var(--success)!important; box-shadow: 0 0 0 3px rgba(52,211,153,0.12)!important; }
+
+        .eye-btn {
+          position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+          background: none; border: none; color: var(--txt3);
+          cursor: pointer; font-size: 15px; z-index: 2; transition: color .2s;
+        }
+        .eye-btn:hover { color: var(--txt); }
+
+        /* ── 4-Digit Code Display ── */
+        .code-display-wrap {
+          background: rgba(124,106,247,0.06);
+          border: 1px solid rgba(124,106,247,0.25);
+          border-radius: 16px; padding: 18px 20px;
+          margin-bottom: 18px;
+          animation: fadeUp .5s .15s ease both;
+        }
+        .code-display-label {
+          font-size: 11px; color: var(--accent); font-weight: 600;
+          text-transform: uppercase; letter-spacing: 0.8px;
+          margin-bottom: 12px;
+          display: flex; align-items: center; gap: 6px;
+        }
+        .code-blink {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--accent);
+          animation: blink 1.2s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+        .code-digits {
+          display: flex; gap: 10px; justify-content: center;
+        }
+        .code-digit {
+          width: 54px; height: 62px; border-radius: 12px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(124,106,247,0.3);
+          display: flex; align-items: center; justify-content: center;
+          font-family: var(--font-h); font-size: 30px; font-weight: 800;
+          color: var(--accent);
+          box-shadow: 0 0 14px rgba(124,106,247,0.12);
+          transition: transform .15s;
+        }
+        .code-hint {
+          font-size: 11px; color: var(--txt3); text-align: center; margin-top: 10px;
+          line-height: 1.5;
+        }
+
+        /* ── OTP Input Boxes ── */
+        .otp-label {
+          font-size: 13px; color: var(--txt2); text-align: center;
+          margin-bottom: 12px;
+          animation: fadeUp .5s .2s ease both;
+        }
+        .otp-wrap {
+          display: flex; gap: 10px; justify-content: center;
+          margin-bottom: 18px;
+          animation: fadeUp .5s .25s ease both;
+        }
+        .otp-box {
+          width: 56px; height: 62px; border-radius: 12px;
+          background: var(--surf2); border: 1px solid var(--border);
+          color: var(--txt); font-family: var(--font-h);
+          font-size: 28px; font-weight: 800; text-align: center;
+          outline: none; transition: all .22s;
+          caret-color: var(--accent);
+        }
+        .otp-box:focus {
+          border-color: var(--accent);
+          background: rgba(124,106,247,0.06);
+          box-shadow: 0 0 0 3px rgba(124,106,247,0.18);
+        }
+        .otp-box.filled { border-color: rgba(67,232,200,0.4); color: var(--accent3); }
+        .otp-box.wrong  { border-color: var(--danger)!important; box-shadow: 0 0 0 3px rgba(248,113,113,0.18)!important; }
+
+        /* ── Buttons ── */
+        .btn {
+          width: 100%; padding: 13px; border: none; border-radius: 14px;
+          font-family: var(--font-b); font-size: 14px; font-weight: 700;
+          cursor: pointer; transition: all .25s;
+          position: relative; overflow: hidden; letter-spacing: 0.3px;
+        }
+        .btn-primary {
+          background: var(--grad); color: #fff;
+          box-shadow: 0 4px 24px rgba(124,106,247,0.35);
+          animation: fadeUp .5s .45s ease both;
+        }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,106,247,0.5); }
+        .btn-primary:active:not(:disabled){ transform: scale(0.98); }
+        .btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none!important; }
+        .btn-ghost {
+          background: transparent; border: 1px solid var(--border);
+          color: var(--txt2); margin-top: 10px;
+          animation: fadeUp .5s .5s ease both;
+        }
+        .btn-ghost:hover { border-color: var(--border2); color: var(--txt); background: rgba(255,255,255,0.04); }
+
+        /* ripple */
+        .btn .ripple {
+          position: absolute; border-radius: 50%;
+          background: rgba(255,255,255,0.22);
+          transform: scale(0); animation: rippleA .55s linear;
+          pointer-events: none;
+        }
+        @keyframes rippleA { to { transform: scale(4); opacity: 0; } }
+
+        /* spinner */
+        .spinner {
+          display: inline-block; width: 15px; height: 15px;
+          border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+          border-radius: 50%; animation: spin .6s linear infinite;
+          vertical-align: middle; margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Message Box ── */
+        .msg-box {
+          margin-top: 14px; min-height: 0; font-size: 13px;
+          text-align: center; border-radius: 10px;
+          padding: 0; transition: all .3s;
+        }
+        .msg-box.error   { color: var(--danger);  background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2);  padding: 10px 14px; }
+        .msg-box.success { color: var(--success); background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.2);   padding: 10px 14px; }
+        .msg-box.info    { color: #a09af7;        background: rgba(124,106,247,0.08); border: 1px solid rgba(124,106,247,0.2);  padding: 10px 14px; }
+
+        /* ── Password Strength ── */
+        .strength-wrap { margin: -8px 0 14px; animation: fadeUp .5s .3s ease both; }
+        .strength-bars { display: flex; gap: 5px; margin-bottom: 5px; }
+        .bar { flex: 1; height: 3px; border-radius: 4px; background: rgba(255,255,255,0.08); transition: background .35s; }
+        .strength-label { font-size: 11px; color: var(--txt3); font-weight: 500; transition: color .3s; }
+
+        /* ── Step content ── */
+        .step-content { display: none; }
+        .step-content.active { display: block; }
+
+        /* ── Success screen ── */
+        .success-anim { text-align: center; padding: 10px 0; animation: fadeUp .5s ease both; }
+        .check-circle {
+          width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 18px;
+          background: rgba(52,211,153,0.12); border: 2px solid rgba(52,211,153,0.4);
+          display: flex; align-items: center; justify-content: center; font-size: 32px;
+          animation: checkPop .5s cubic-bezier(.22,.68,0,1.4) both;
+        }
+        @keyframes checkPop {
+          from { transform: scale(0); opacity: 0; }
+          to   { transform: scale(1); opacity: 1; }
+        }
+        .success-title { font-family: var(--font-h); font-size: 22px; font-weight: 700; color: var(--txt); margin-bottom: 8px; }
+        .success-sub   { font-size: 13px; color: var(--txt2); line-height: 1.65; }
+
+        /* ── Bottom links ── */
+        .bottom-link {
+          text-align: center; margin-top: 16px; font-size: 13px; color: var(--txt2);
+          animation: fadeUp .5s .6s ease both;
+        }
+        .bottom-link a { color: var(--accent2); text-decoration: none; font-weight: 600; transition: color .2s; }
+        .bottom-link a:hover { color: var(--accent); }
+
+        /* ── Resend ── */
+        .resend-wrap { text-align: center; margin-top: 12px; font-size: 13px; color: var(--txt3); animation: fadeUp .5s .5s ease both; }
+        .resend-btn {
+          background: none; border: none; color: var(--accent);
+          cursor: pointer; font-family: var(--font-b); font-size: 13px; font-weight: 600;
+          padding: 0; transition: opacity .2s;
+        }
+        .resend-btn:hover { opacity: .75; }
+        .resend-btn:disabled { color: var(--txt3); cursor: not-allowed; opacity: 1; }
+
+        /* ── Match hint ── */
+        .match-hint { font-size: 11px; margin: -8px 0 12px 4px; min-height: 16px; transition: color .25s; }
+
+        /* ── Shake animation ── */
+        @keyframes shake {
+          0%,100% { transform: translateX(0); }
+          20%     { transform: translateX(-7px); }
+          40%     { transform: translateX(7px); }
+          60%     { transform: translateX(-4px); }
+          80%     { transform: translateX(4px); }
+        }
+        .shake { animation: shake .32s ease!important; }
+
+        /* ════════════════════════════
+           FOOTER
+        ════════════════════════════ */
+        .footer {
+          position: relative; z-index: 10;
+          background: rgba(4,4,15,0.95);
+          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          border-top: 1px solid var(--border);
+          display: flex; align-items: center; justify-content: center;
+          flex-wrap: wrap; gap: 6px 16px;
+          padding: 14px 20px;
+        }
+        .foot-text  { font-size: 12px; color: var(--txt3); }
+        .foot-brand {
+          font-family: var(--font-h); font-size: 12px; font-weight: 700;
+          background: var(--grad);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .foot-sep   { color: var(--txt3); font-size: 10px; }
+        .foot-links { display: flex; gap: 14px; }
+        .foot-link  { font-size: 11px; color: var(--txt3); text-decoration: none; transition: color .2s; }
+        .foot-link:hover { color: var(--accent); }
+
+        /* ── Toast ── */
+        #toastWrap {
+          position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+          z-index: 9999; pointer-events: none;
+          display: flex; flex-direction: column; align-items: center; gap: 7px;
+        }
+        .toast {
+          padding: 9px 20px; border-radius: 99px; font-size: 13px; font-weight: 500;
+          opacity: 0; transform: translateY(10px) scale(.96);
+          transition: all .3s cubic-bezier(.34,1.4,.64,1);
+          border: 1px solid; white-space: nowrap; backdrop-filter: blur(14px);
+        }
+        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+        .toast.success { background: rgba(20,45,28,.9); border-color: rgba(62,207,110,.3); color: #6ee0a0; }
+        .toast.error   { background: rgba(48,14,14,.9);  border-color: rgba(248,113,113,.3); color: #f08080; }
+        .toast.info    { background: rgba(14,24,50,.9);  border-color: rgba(124,106,247,.3); color: #a09af7; }
+
+        @media(max-width:480px) {
+          .card { padding: 32px 22px; }
+          .code-digit { width: 44px; height: 54px; font-size: 24px; }
+          .otp-box    { width: 48px; height: 56px; font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="aurora">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+</div>
+<div class="grid-bg"></div>
+<div id="toastWrap"></div>
+
+<!-- ════════════════════
+     HEADER
+════════════════════════ -->
+<header class="navbar">
+    <a class="nav-logo" href="/api/login">SocialHub</a>
+    <div class="nav-right">
+        <a class="nav-link" href="/api/login">Login</a>
+        <a class="nav-link" href="/api/register">Register</a>
+    </div>
+</header>
+
+<!-- ════════════════════
+     PAGE
+════════════════════════ -->
+<div class="page">
+    <div class="card">
+
+        <!-- Logo -->
+        <div class="logo-block">
+            <div class="logo-badge">🔐</div>
+            <div class="logo-name">SocialHub</div>
+            <div class="logo-sub">Account Recovery</div>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="steps">
+            <div class="step-dot active" id="dot1">1</div>
+            <div class="step-line"       id="line1"></div>
+            <div class="step-dot"        id="dot2">2</div>
+            <div class="step-line"       id="line2"></div>
+            <div class="step-dot"        id="dot3">3</div>
+            <div class="step-line"       id="line3"></div>
+            <div class="step-dot"        id="dot4">✓</div>
+        </div>
+
+        <!-- ══════════════════════════════
+             STEP 1 — Enter Email
+             No backend call here.
+             Sirf email validate karo aur code generate karo.
+        ══════════════════════════════ -->
+        <div class="step-content active" id="step1">
+            <div class="field" style="--d:.2s">
+                <span class="field-icon">✉️</span>
+                <input type="email" id="emailInput" placeholder="Email" autocomplete="email"/>
+                <label for="emailInput">Email address</label>
+            </div>
+            <button class="btn btn-primary" id="step1Btn" onclick="handleStep1()">
+                Get Verification Code
+            </button>
+            <div class="msg-box" id="msg1"></div>
+            <div class="bottom-link">Remember password? <a href="/api/login">Login here</a></div>
+        </div>
+
+        <!-- ══════════════════════════════
+             STEP 2 — Show Code + Verify
+             4-digit code generated on frontend only.
+             No backend call. User types the displayed code.
+        ══════════════════════════════ -->
+        <div class="step-content" id="step2">
+
+            <!-- Code shown on screen -->
+            <div class="code-display-wrap">
+                <div class="code-display-label">
+                    <div class="code-blink"></div>
+                    Your Verification Code
+                </div>
+                <div class="code-digits">
+                    <div class="code-digit" id="cd0">—</div>
+                    <div class="code-digit" id="cd1">—</div>
+                    <div class="code-digit" id="cd2">—</div>
+                    <div class="code-digit" id="cd3">—</div>
+                </div>
+                <div class="code-hint">
+                    📸 Note down this code — enter it below to verify
+                </div>
+            </div>
+
+            <!-- User enters the code -->
+            <div class="otp-label">Enter the 4-digit code shown above</div>
+            <div class="otp-wrap" id="otpWrap">
+                <input class="otp-box" id="otp0" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                       onkeydown="otpKey(event,0)" oninput="otpInput(event,0)"/>
+                <input class="otp-box" id="otp1" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                       onkeydown="otpKey(event,1)" oninput="otpInput(event,1)"/>
+                <input class="otp-box" id="otp2" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                       onkeydown="otpKey(event,2)" oninput="otpInput(event,2)"/>
+                <input class="otp-box" id="otp3" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+                       onkeydown="otpKey(event,3)" oninput="otpInput(event,3)"/>
+            </div>
+
+            <button class="btn btn-primary" id="step2Btn" onclick="handleStep2()">
+                Verify Code
+            </button>
+            <div class="msg-box" id="msg2"></div>
+
+            <div class="resend-wrap">
+                <span id="resendTimerTxt"></span>
+                <button class="resend-btn" id="resendBtn" onclick="resendCode()" disabled>Resend Code</button>
+            </div>
+            <div class="bottom-link" style="margin-top:10px">
+                <a href="#" onclick="goStep(1);return false;">← Change email</a>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════
+             STEP 3 — New Password
+             After code verified, user sets new password.
+             API called here only.
+        ══════════════════════════════ -->
+        <div class="step-content" id="step3">
+
+            <p style="font-size:13px;color:var(--txt2);margin-bottom:18px;line-height:1.6;animation:fadeUp .4s ease both;">
+                ✅ Code verified! Now set a new strong password for your account.
+            </p>
+
+            <div class="field" style="--d:.2s">
+                <span class="field-icon">🔒</span>
+                <input type="password" id="newPass" placeholder="New Password"/>
+                <label for="newPass">New Password</label>
+                <button type="button" class="eye-btn" id="eyeNew">👁</button>
+            </div>
+
+            <!-- Password strength meter -->
+            <div class="strength-wrap">
+                <div class="strength-bars">
+                    <div class="bar" id="sb0"></div>
+                    <div class="bar" id="sb1"></div>
+                    <div class="bar" id="sb2"></div>
+                    <div class="bar" id="sb3"></div>
+                </div>
+                <div class="strength-label" id="strengthLabel">Enter a password</div>
+            </div>
+
+            <div class="field" style="--d:.32s">
+                <span class="field-icon">🔑</span>
+                <input type="password" id="confirmPass" placeholder="Confirm Password"/>
+                <label for="confirmPass">Confirm Password</label>
+                <button type="button" class="eye-btn" id="eyeConfirm">👁</button>
+            </div>
+            <div class="match-hint" id="matchHint"></div>
+
+            <button class="btn btn-primary" id="step3Btn" onclick="handleStep3()">
+                Reset Password
+            </button>
+            <div class="msg-box" id="msg3"></div>
+        </div>
+
+        <!-- ══════════════════════════════
+             STEP 4 — Success
+        ══════════════════════════════ -->
+        <div class="step-content" id="step4">
+            <div class="success-anim">
+                <div class="check-circle">✅</div>
+                <div class="success-title">Password Reset Done!</div>
+                <div class="success-sub">
+                    Tera password successfully reset ho gaya hai bhai!<br/>
+                    Ab apne new password se login karo. 🚀
+                </div>
+                <button class="btn btn-primary" style="margin-top:26px;animation:none;" onclick="location.href='/api/login'">
+                    Go to Login →
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ════════════════════
+     FOOTER
+════════════════════════ -->
+<footer class="footer">
+    <span class="foot-text">Crafted with ❤️ by</span>
+    <span class="foot-brand">Satish Kumar Mishra</span>
+    <span class="foot-sep">·</span>
+    <span class="foot-text">SocialHub © 2025</span>
+    <div class="foot-links">
+        <a class="foot-link" href="/api/login">Login</a>
+        <a class="foot-link" href="/api/register">Register</a>
+        <a class="foot-link" href="#">Privacy</a>
+        <a class="foot-link" href="#">Terms</a>
+    </div>
+</footer>
+
+<script>
+    /* ═══════════════════════════════════
+       STATE
+    ═══════════════════════════════════ */
+    let generatedCode  = '';   // 4-digit code (frontend only)
+    let verifiedEmail  = '';   // email collected in step 1
+    let resendInterval = null;
+    let resendSecs     = 30;
+
+    /* ═══════════════════════════════════
+       TOAST
+    ═══════════════════════════════════ */
+    function toast(msg, type = 'success', dur = 3000) {
+      const w  = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className   = `toast ${type}`;
+      el.textContent = msg;
+      w.appendChild(el);
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+      setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400); }, dur);
+    }
+
+    /* ═══════════════════════════════════
+       STEP NAVIGATION
+    ═══════════════════════════════════ */
+    function goStep(n) {
+      document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step${n}`).classList.add('active');
+      // Update dots
+      for (let i = 1; i <= 4; i++) {
+        const d = document.getElementById(`dot${i}`);
+        const l = document.getElementById(`line${i}`);
+        d.classList.toggle('active', i === n);
+        d.classList.toggle('done',   i < n);
+        if (l) l.classList.toggle('done', i < n);
+      }
+      if (n === 2) setTimeout(() => document.getElementById('otp0').focus(), 150);
+    }
+
+    /* ═══════════════════════════════════
+       MESSAGE BOX
+    ═══════════════════════════════════ */
+    function setMsg(id, html, type) {
+      const el = document.getElementById(id);
+      el.className = `msg-box ${type}`;
+      el.innerHTML = html;
+    }
+    function clearMsg(id) {
+      const el = document.getElementById(id);
+      el.className = 'msg-box'; el.innerHTML = '';
+    }
+
+    /* ═══════════════════════════════════
+       SHAKE HELPER
+    ═══════════════════════════════════ */
+    function shake(el) {
+      el.classList.remove('shake');
+      void el.offsetWidth;
+      el.classList.add('shake');
+      el.addEventListener('animationend', () => el.classList.remove('shake'), { once: true });
+    }
+
+    /* ═══════════════════════════════════
+       RIPPLE EFFECT
+    ═══════════════════════════════════ */
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const r    = document.createElement('span');
+        r.className = 'ripple';
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+        this.appendChild(r);
+        setTimeout(() => r.remove(), 600);
+      });
+    });
+
+    /* ═══════════════════════════════════
+       GENERATE 4-DIGIT CODE — FRONTEND ONLY
+       No backend. Pure Math.random().
+    ═══════════════════════════════════ */
+    function generateCode() {
+      generatedCode = String(Math.floor(1000 + Math.random() * 9000));
+      return generatedCode;
+    }
+
+    function displayCode(code) {
+      for (let i = 0; i < 4; i++) {
+        const el = document.getElementById(`cd${i}`);
+        el.textContent = '—';
+        setTimeout(() => {
+          el.style.transform   = 'scale(0.75)';
+          el.style.transition  = 'transform .15s';
+          setTimeout(() => {
+            el.textContent         = code[i];
+            el.style.transform     = 'scale(1)';
+          }, 140);
+        }, i * 90);
+      }
+    }
+
+    /* ═══════════════════════════════════
+       STEP 1 — EMAIL VALIDATION
+       ✅ NO backend API call here
+       Just validate email format → generate code → go to step 2
+    ═══════════════════════════════════ */
+    async function handleStep1() {
+      clearMsg('msg1');
+      const emailEl = document.getElementById('emailInput');
+      const email   = emailEl.value.trim();
+      const btn     = document.getElementById('step1Btn');
+
+      // Validate email
+      if (!email) {
+        emailEl.classList.add('err'); shake(emailEl);
+        setMsg('msg1', '📧 Email address is required', 'error'); return;
+      }
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        emailEl.classList.add('err'); shake(emailEl);
+        setMsg('msg1', '📧 Please enter a valid email address', 'error'); return;
+      }
+
+      emailEl.classList.remove('err'); emailEl.classList.add('ok');
+      verifiedEmail = email;
+
+      // UX: small loading feel
+      btn.disabled  = true;
+      btn.innerHTML = '<span class="spinner"></span>Generating Code…';
+      await delay(500);
+
+      // Generate 4-digit code on frontend
+      const code = generateCode();
+      displayCode(code);
+
+      // Move to step 2
+      goStep(2);
+      startResendTimer();
+      toast('✅ Verification code generated!', 'success');
+
+      btn.disabled  = false;
+      btn.innerHTML = 'Get Verification Code';
+    }
+
+    /* ═══════════════════════════════════
+       OTP INPUT HANDLING
+    ═══════════════════════════════════ */
+    function otpInput(e, idx) {
+      const val = e.target.value.replace(/\D/g, '');
+      e.target.value = val;
+      e.target.classList.toggle('filled', val.length === 1);
+      e.target.classList.remove('wrong');
+
+      if (val.length === 1 && idx < 3) {
+        document.getElementById(`otp${idx + 1}`).focus();
+      }
+
+      // Auto-verify when all 4 filled
+      const full = [0,1,2,3].map(i => document.getElementById(`otp${i}`).value).join('');
+      if (full.length === 4) {
+        setTimeout(handleStep2, 200); // slight delay for last digit render
+      }
+    }
+
+    function otpKey(e, idx) {
+      if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+        document.getElementById(`otp${idx - 1}`).focus();
+      }
+    }
+
+    function getEnteredCode() {
+      return [0,1,2,3].map(i => document.getElementById(`otp${i}`).value).join('');
+    }
+
+    function clearOTP() {
+      [0,1,2,3].forEach(i => {
+        const el = document.getElementById(`otp${i}`);
+        el.value = ''; el.classList.remove('filled', 'wrong');
+      });
+      document.getElementById('otp0').focus();
+    }
+
+    /* ═══════════════════════════════════
+       STEP 2 — VERIFY CODE (FRONTEND ONLY)
+       ✅ NO backend API call
+       Compare entered code with generatedCode (JS variable)
+    ═══════════════════════════════════ */
+    function handleStep2() {
+      clearMsg('msg2');
+      const entered = getEnteredCode();
+
+      if (entered.length < 4) {
+        setMsg('msg2', '🔢 Please enter all 4 digits', 'error'); return;
+      }
+
+      if (entered === generatedCode) {
+        /* ✅ CORRECT */
+        [0,1,2,3].forEach(i => {
+          document.getElementById(`otp${i}`).classList.remove('wrong');
+          document.getElementById(`otp${i}`).classList.add('filled');
+        });
+        setMsg('msg2', '✅ Code matched! Moving ahead…', 'success');
+        clearInterval(resendInterval);
+        setTimeout(() => goStep(3), 700);
+        toast('✅ Code verified!', 'success');
+
+      } else {
+        /* ❌ WRONG */
+        [0,1,2,3].forEach(i => document.getElementById(`otp${i}`).classList.add('wrong'));
+        shake(document.getElementById('otpWrap'));
+        setMsg('msg2', '❌ Wrong code! Check the digits shown above and try again.', 'error');
+        toast('❌ Wrong code!', 'error');
+        setTimeout(clearOTP, 900);
+      }
+    }
+
+    /* ═══════════════════════════════════
+       RESEND CODE — FRONTEND ONLY
+       Generates a new 4-digit code
+    ═══════════════════════════════════ */
+    function startResendTimer() {
+      resendSecs = 30;
+      const btn = document.getElementById('resendBtn');
+      const txt = document.getElementById('resendTimerTxt');
+      btn.disabled = true;
+      clearInterval(resendInterval);
+
+      resendInterval = setInterval(() => {
+        resendSecs--;
+        txt.textContent = `Resend in ${resendSecs}s · `;
+        if (resendSecs <= 0) {
+          clearInterval(resendInterval);
+          txt.textContent  = '';
+          btn.disabled     = false;
+        }
+      }, 1000);
+    }
+
+    function resendCode() {
+      const code = generateCode();
+      displayCode(code);
+      clearOTP();
+      clearMsg('msg2');
+      startResendTimer();
+      toast('🔄 New code generated!', 'info');
+    }
+
+    /* ═══════════════════════════════════
+       PASSWORD STRENGTH METER
+    ═══════════════════════════════════ */
+    const SC = ['#f87171','#fbbf24','#38bdf8','#34d399'];
+    const ST = ['Too weak','Fair','Good','Strong 💪'];
+
+    function passwordScore(val) {
+      let s = 0;
+      if (val.length >= 8)           s++;
+      if (/[A-Z]/.test(val))         s++;
+      if (/[0-9]/.test(val))         s++;
+      if (/[^A-Za-z0-9]/.test(val)) s++;
+      return s;
+    }
+
+    document.getElementById('newPass').addEventListener('input', function() {
+      const val   = this.value;
+      const score = val.length === 0 ? -1 : passwordScore(val) - 1;
+      [0,1,2,3].forEach(i => {
+        document.getElementById(`sb${i}`).style.background =
+          i <= score && score >= 0 ? SC[score] : 'rgba(255,255,255,0.08)';
+      });
+      const lbl = document.getElementById('strengthLabel');
+      lbl.textContent = val ? (ST[score] || 'Too weak') : 'Enter a password';
+      lbl.style.color = val ? SC[Math.max(0, score)] : 'var(--txt3)';
+      checkMatch();
+    });
+
+    /* ═══════════════════════════════════
+       CONFIRM PASSWORD — FRONTEND MATCH CHECK
+    ═══════════════════════════════════ */
+    document.getElementById('confirmPass').addEventListener('input', checkMatch);
+
+    function checkMatch() {
+      const p  = document.getElementById('newPass').value;
+      const c  = document.getElementById('confirmPass').value;
+      const el = document.getElementById('confirmPass');
+      const h  = document.getElementById('matchHint');
+
+      if (!c) {
+        h.textContent = ''; el.classList.remove('err','ok'); return;
+      }
+      if (p === c) {
+        h.textContent = '✅ Passwords match'; h.style.color = 'var(--success)';
+        el.classList.remove('err'); el.classList.add('ok');
+      } else {
+        h.textContent = '❌ Passwords do not match'; h.style.color = 'var(--danger)';
+        el.classList.remove('ok'); el.classList.add('err');
+      }
+    }
+
+    /* ═══════════════════════════════════
+       EYE TOGGLES
+    ═══════════════════════════════════ */
+    function makeEye(btnId, inputId) {
+      let show = false;
+      document.getElementById(btnId).addEventListener('click', () => {
+        show = !show;
+        document.getElementById(inputId).type = show ? 'text' : 'password';
+        document.getElementById(btnId).textContent = show ? '🙈' : '👁';
+      });
+    }
+    makeEye('eyeNew',     'newPass');
+    makeEye('eyeConfirm', 'confirmPass');
+
+    /* ═══════════════════════════════════
+       STEP 3 — RESET PASSWORD
+       ✅ ONLY API in this whole page
+
+       API: POST /api/reset-password
+       Body: { email: String, newPassword: String }
+       Response: { success: Boolean, message: String }
+
+       Frontend sends:
+         email       → verifiedEmail (collected in step 1 input)
+         newPassword → new password entered by user in step 3
+    ═══════════════════════════════════ */
+    async function handleStep3() {
+      clearMsg('msg3');
+      const newPassEl  = document.getElementById('newPass');
+      const confPassEl = document.getElementById('confirmPass');
+      const btn        = document.getElementById('step3Btn');
+      const newPass    = newPassEl.value;
+      const confirm    = confPassEl.value;
+
+      // Validation
+      if (!newPass) {
+        newPassEl.classList.add('err'); shake(newPassEl);
+        setMsg('msg3', '🔒 Please enter a new password', 'error'); return;
+      }
+      if (newPass.length < 6) {
+        newPassEl.classList.add('err'); shake(newPassEl);
+        setMsg('msg3', '🔒 Password must be at least 6 characters', 'error'); return;
+      }
+      if (passwordScore(newPass) < 2) {
+        newPassEl.classList.add('err'); shake(newPassEl);
+        setMsg('msg3', '🔒 Password is too weak — add numbers or uppercase letters', 'error'); return;
+      }
+      if (!confirm) {
+        confPassEl.classList.add('err'); shake(confPassEl);
+        setMsg('msg3', '🔑 Please confirm your password', 'error'); return;
+      }
+      if (newPass !== confirm) {
+        confPassEl.classList.add('err'); shake(confPassEl);
+        setMsg('msg3', '❌ Passwords do not match', 'error'); return;
+      }
+
+      btn.disabled  = true;
+      btn.innerHTML = '<span class="spinner"></span>Resetting…';
+
+      try {
+        /*
+         * ════════════════════════════════════════
+         * ONLY API CALL IN THIS PAGE
+         *
+         * POST /api/reset-password
+         * Content-Type: application/json
+         *
+         * Request Body:
+         * {
+         *   "email":       "user@example.com",   ← from step 1 input
+         *   "newPassword": "NewPass@123"          ← from step 3 form
+         * }
+         *
+         * Response:
+         * {
+         *   "success": true,
+         *   "message": "Password reset successfully"
+         * }
+         *
+         * On error:
+         * {
+         *   "success": false,
+         *   "message": "Email not found" / "Something went wrong"
+         * }
+         * ════════════════════════════════════════
+         */
+        const res  = await fetch('/api/reset-password', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            email:       verifiedEmail,
+            newPassword: newPass
+          })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          setMsg('msg3', `❌ ${data.message || 'Reset failed. Please try again.'}`, 'error');
+          return;
+        }
+
+        // Success
+        goStep(4);
+        toast('🎉 Password reset successful!', 'success', 4000);
+
+      } catch(err) {
+        console.error('Reset error:', err);
+        setMsg('msg3', '🌐 Network error. Please check your connection and try again.', 'error');
+      } finally {
+        btn.disabled  = false;
+        btn.innerHTML = 'Reset Password';
+      }
+    }
+
+    /* ═══════════════════════════════════
+       UTILITY
+    ═══════════════════════════════════ */
+    function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
