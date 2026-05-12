@@ -143,4 +143,27 @@ public class MailService {
             return -1;
         }
     }
+
+    public void sendSimpleMail(String to, String subject, String htmlContent) {
+
+        try {
+
+            MimeMessage message = mailSender.createMimeMessage();
+
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true);
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+
+            helper.setText(htmlContent, true);
+
+            helper.setFrom("your_email@gmail.com");
+
+            mailSender.send(message);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

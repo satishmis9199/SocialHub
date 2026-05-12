@@ -135,6 +135,7 @@ public class SecurityConfig {
                                 "/api/register",
                                 "/api/forget",
                                 "/api/reset-password",
+                                "/send-email/otp",
 
                                 "/oauth2/**",
 

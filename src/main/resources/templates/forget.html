@@ -768,7 +768,17 @@
 
       // Generate 4-digit code on frontend
       const code = generateCode();
-      displayCode(code);
+<!--      displayCode(code);-->
+      await fetch("/send-email/otp", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({
+        email: verifiedEmail,
+        otp: code
+    })
+});
 
       // Move to step 2
       goStep(2);
