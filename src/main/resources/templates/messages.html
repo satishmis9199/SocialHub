@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>SocialHub — Messages</title>
+    <title>SnapSphere — Messages</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
@@ -502,7 +502,7 @@
 ════════════════════════ -->
 <header class="navbar">
     <button class="back-btn" id="backBtn" onclick="goBackToList()">←</button>
-    <div class="nav-logo" onclick="location.href='/user/dashboard'">SocialHub</div>
+    <div class="nav-logo" onclick="location.href='/user/dashboard'">SnapSphere</div>
     <div class="nav-chat-title" id="navChatTitle">Messages</div>
     <div class="nav-search">
         <span style="color:var(--txt3);font-size:14px;">🔍</span>
@@ -608,7 +608,7 @@
     <span class="foot-text">Crafted with ❤️ by</span>
     <span class="foot-brand">Satish Kumar Mishra</span>
     <span class="foot-sep">·</span>
-    <span class="foot-text">SocialHub © 2025</span>
+    <span class="foot-text">SnapSphere © 2025</span>
     <div class="foot-links">
         <a class="foot-link" href="/user/dashboard">Dashboard</a>
         <a class="foot-link" href="/user/myProfile">Profile</a>
@@ -942,7 +942,7 @@ function openProfileByMessage(senderId) {
       const box = document.getElementById('chatBox');
       box.innerHTML = `<div class="date-sep">Today</div>`;
       [
-        { senderUsername: selectedUser?.username || 'user', message: 'Bhai SocialHub ka UI ekdm mast bana hai! 🔥', createdAt: new Date(Date.now()-3600000).toISOString(), seen: true  },
+        { senderUsername: selectedUser?.username || 'user', message: 'Bhai SnapSphere ka UI ekdm mast bana hai! 🔥', createdAt: new Date(Date.now()-3600000).toISOString(), seen: true  },
         { senderUsername: loggedInUsername || 'me',          message: 'Haan yaar, sab smooth chal raha hai ✅',       createdAt: new Date(Date.now()-3500000).toISOString(), seen: true  },
         { senderUsername: selectedUser?.username || 'user', message: 'Messages page v zabardast 💯',                 createdAt: new Date(Date.now()-3400000).toISOString(), seen: true  },
         { senderUsername: loggedInUsername || 'me',          message: 'Satish ne banaya hai bhai 😎🚀',               createdAt: new Date(Date.now()-60000).toISOString(),   seen: false },
