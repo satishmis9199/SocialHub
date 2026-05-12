@@ -133,6 +133,8 @@ public class SecurityConfig {
                                 "/api/login",
 
                                 "/api/register",
+                                "/api/forget",
+                                "/api/reset-password",
 
                                 "/oauth2/**",
 
@@ -205,7 +207,7 @@ public class SecurityConfig {
 
                                             isAjax
 
-                                                    || uri.startsWith("/api/")
+
 
                                     ) {
 

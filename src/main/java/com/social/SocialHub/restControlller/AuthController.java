@@ -1,9 +1,11 @@
 package com.social.SocialHub.restControlller;
 
 import com.social.SocialHub.dto.LoginRequestDTO;
+import com.social.SocialHub.dto.ResetPasswordDTO;
 import com.social.SocialHub.security.JwtUtil;
 import com.social.SocialHub.service.CustomUserDetail;
 
+import com.social.SocialHub.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,6 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -31,6 +35,8 @@ public class AuthController {
             LoggerFactory.getLogger(AuthController.class);
 
     private final AuthenticationManager authenticationManager;
+    @Autowired
+    UserService userService;
 
     private final JwtUtil jwtUtil;
 
@@ -272,4 +278,45 @@ public class AuthController {
                 )
         );
     }
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @RequestBody ResetPasswordDTO dto) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+
+            System.out.println("API HIT");
+            System.out.println(dto.getEmail());
+            System.out.println(dto.getNewPassword());
+
+            boolean updated =
+                    userService.resetPassword(
+                            dto.getEmail(),
+                            dto.getNewPassword()
+                    );
+
+            if (!updated) {
+                response.put("success", false);
+                response.put("message", "Email not found");
+
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            response.put("success", true);
+            response.put("message", "Password reset successfully");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            response.put("success", false);
+            response.put("message", "Something went wrong");
+
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
 }

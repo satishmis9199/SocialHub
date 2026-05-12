@@ -10,4 +10,8 @@ public class RegisterController {
     public String registerUser(){
         return "Registration";
     }
+    @GetMapping("/forget")
+    public String forgetUser(){
+        return "forget";
+    }
 }
