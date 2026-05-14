@@ -2,9 +2,12 @@ package com.social.SocialHub.restControlller;
 
 import com.social.SocialHub.dto.LoginRequestDTO;
 import com.social.SocialHub.dto.ResetPasswordDTO;
+import com.social.SocialHub.entity.UserEntity;
+import com.social.SocialHub.repository.UserRepository;
 import com.social.SocialHub.security.JwtUtil;
 import com.social.SocialHub.service.CustomUserDetail;
 
+import com.social.SocialHub.service.PostService;
 import com.social.SocialHub.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +39,11 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     @Autowired
+    UserRepository userRepository;
+    @Autowired
     UserService userService;
+    @Autowired
+    PostService postService;
 
     private final JwtUtil jwtUtil;
 
@@ -193,11 +200,9 @@ public class AuthController {
             HttpServletResponse response
     ) {
 
-        logger.info("🚪 LOGOUT");
-
-        // =============================================
-        // CLEAR SECURITY CONTEXT
-        // =============================================
+        UserEntity user=postService.getLoggedInUser();
+        user.setFcmToken(null);
+        userRepository.save(user);
         SecurityContextHolder.clearContext();
 
         // =============================================
