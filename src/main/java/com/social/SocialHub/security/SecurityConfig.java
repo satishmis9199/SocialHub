@@ -113,9 +113,7 @@ public class SecurityConfig {
                         )
                 )
 
-                // =====================================
-                // REQUEST CACHE
-                // =====================================
+
                 .requestCache(cache ->
                         cache.requestCache(requestCache())
                 )
@@ -161,27 +159,18 @@ public class SecurityConfig {
 
                         ).permitAll()
 
-                        // =================================
-                        // PROTECTED USER URLS
-                        // =================================
+
                         .requestMatchers("/user/**")
                         .authenticated()
 
-                        // =================================
-                        // EVERYTHING ELSE
-                        // =================================
+
                         .anyRequest()
                         .authenticated()
                 )
 
-                // =====================================
-                // EXCEPTION HANDLING
-                // =====================================
+
                 .exceptionHandling(ex -> ex
 
-                        // =================================
-                        // UNAUTHORIZED
-                        // =================================
                         .authenticationEntryPoint(
 
                                 (request, response, authException) -> {
@@ -196,14 +185,8 @@ public class SecurityConfig {
                                                     )
                                             );
 
-                                    System.out.println(
-                                            "❌ Unauthorized : "
-                                                    + uri
-                                    );
 
-                                    // =============================
-                                    // AJAX / API
-                                    // =============================
+
                                     if (
 
                                             isAjax
@@ -240,9 +223,6 @@ public class SecurityConfig {
                                 }
                         )
 
-                        // =================================
-                        // ACCESS DENIED
-                        // =================================
                         .accessDeniedHandler(
 
                                 (request, response, accessDeniedException) -> {
@@ -257,14 +237,9 @@ public class SecurityConfig {
                                                     )
                                             );
 
-                                    System.out.println(
-                                            "⛔ Access Denied : "
-                                                    + uri
-                                    );
 
-                                    // =============================
-                                    // AJAX / API
-                                    // =============================
+
+
                                     if (
 
                                             isAjax

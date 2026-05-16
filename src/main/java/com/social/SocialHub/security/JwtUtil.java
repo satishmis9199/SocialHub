@@ -37,28 +37,27 @@ public class JwtUtil {
                 .getBody();
     }
 
-    // 👤 Username
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
-    // 🆔 UUID (IMPORTANT FIX)
+
     public UUID extractId(String token) {
         String id = extractAllClaims(token).get("id", String.class);
         return UUID.fromString(id);
     }
 
-    // 🎭 Role
+
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
 
-    // ⏳ Expiry check
+
     public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
 
-    // ✅ Validate Token (STRONG)
+
     public boolean validateToken(String token) {
         try {
             return !isTokenExpired(token);

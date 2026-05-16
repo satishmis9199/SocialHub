@@ -34,8 +34,6 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private UserRepository userRepository;
 
-    private final boolean LOAD_FULL_USER = true;
-
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -45,9 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String uri = request.getRequestURI();
 
-        // =========================================
-        // SKIP WEBSOCKET
-        // =========================================
+        // Skip websocket
         if (uri.startsWith("/ws")) {
 
             filterChain.doFilter(request, response);
@@ -55,135 +51,94 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = extractToken(request);
+        try {
 
-        // =========================================
-        // NO TOKEN
-        // =========================================
-        if (token == null || token.isBlank()) {
+            String token = extractToken(request);
 
-            logger.warn("⚠️ No JWT token found");
+            // No token
+            if (token == null || token.isBlank()) {
 
-            SecurityContextHolder.clearContext();
-
-            filterChain.doFilter(request, response);
-
-            return;
-        }
-
-        // =========================================
-        // ALREADY AUTHENTICATED
-        // =========================================
-        if (SecurityContextHolder
-                .getContext()
-                .getAuthentication() == null) {
-
-            try {
-
-                // =====================================
-                // VALIDATE TOKEN
-                // =====================================
-                if (jwtUtil.validateToken(token)) {
-
-                    UUID userId =
-                            jwtUtil.extractId(token);
-
-                    String username =
-                            jwtUtil.extractUsername(token);
-
-                    String role =
-                            jwtUtil.extractRole(token);
-
-                    logger.info(
-                            "✅ JWT VALID : {}",
-                            username
-                    );
-
-                    CustomUserDetail userDetails;
-
-                    // =====================================
-                    // LOAD FULL USER
-                    // =====================================
-                    if (LOAD_FULL_USER) {
-
-                        UserEntity user =
-                                userRepository
-                                        .findById(userId)
-                                        .orElse(null);
-
-                        if (user == null) {
-
-                            logger.warn(
-                                    "❌ User not found"
-                            );
-
-                            SecurityContextHolder
-                                    .clearContext();
-
-                            filterChain.doFilter(
-                                    request,
-                                    response
-                            );
-
-                            return;
-                        }
-
-                        userDetails =
-                                new CustomUserDetail(user);
-
-                    } else {
-
-                        userDetails =
-                                new CustomUserDetail(
-                                        userId,
-                                        username,
-                                        role
-                                );
-                    }
-
-                    // =====================================
-                    // AUTHENTICATION
-                    // =====================================
-                    UsernamePasswordAuthenticationToken
-                            authToken =
-
-                            new UsernamePasswordAuthenticationToken(
-
-                                    userDetails,
-
-                                    null,
-
-                                    userDetails.getAuthorities()
-                            );
-
-                    SecurityContextHolder
-                            .getContext()
-                            .setAuthentication(authToken);
-
-                    logger.info(
-                            "✅ AUTHENTICATION SET : {}",
-                            username
-                    );
-
-                } else {
-
-                    logger.warn(
-                            "❌ Invalid JWT Token"
-                    );
-
-                    SecurityContextHolder.clearContext();
-                }
-
-            } catch (Exception e) {
-
-                logger.error(
-                        "🔥 JWT PROCESSING ERROR : {}",
-                        e.getMessage(),
-                        e
-                );
+                logger.warn("⚠️ No JWT token found");
 
                 SecurityContextHolder.clearContext();
+
+                filterChain.doFilter(request, response);
+
+                return;
             }
+
+            // Validate token
+            if (!jwtUtil.validateToken(token)) {
+
+                logger.warn("❌ Invalid JWT Token");
+
+                SecurityContextHolder.clearContext();
+
+                filterChain.doFilter(request, response);
+
+                return;
+            }
+
+            // Extract data
+            UUID userId =
+                    jwtUtil.extractId(token);
+
+            String username =
+                    jwtUtil.extractUsername(token);
+
+            logger.info(
+                    "✅ JWT VALID : {}",
+                    username
+            );
+
+            // Load user
+            UserEntity user =
+                    userRepository
+                            .findById(userId)
+                            .orElse(null);
+
+            if (user == null) {
+
+                logger.warn("❌ User not found");
+
+                SecurityContextHolder.clearContext();
+
+                filterChain.doFilter(request, response);
+
+                return;
+            }
+
+            // Create principal
+            CustomUserDetail userDetails =
+                    new CustomUserDetail(user);
+
+            // Create auth token
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+            // Set auth
+            SecurityContextHolder
+                    .getContext()
+                    .setAuthentication(authToken);
+
+            logger.info(
+                    "✅ AUTHENTICATION SET : {}",
+                    username
+            );
+
+        } catch (Exception e) {
+
+            logger.error(
+                    "🔥 JWT PROCESSING ERROR : {}",
+                    e.getMessage(),
+                    e
+            );
+
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
@@ -196,25 +151,23 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletRequest request
     ) {
 
-        // =====================================
         // COOKIE
-        // =====================================
         if (request.getCookies() != null) {
 
             for (Cookie cookie : request.getCookies()) {
 
                 if ("token".equals(cookie.getName())) {
 
-                    logger.info("🍪 TOKEN FOUND IN COOKIE");
+                    logger.info(
+                            "🍪 TOKEN FOUND IN COOKIE"
+                    );
 
                     return cookie.getValue();
                 }
             }
         }
 
-        // =====================================
         // AUTH HEADER
-        // =====================================
         String authHeader =
                 request.getHeader("Authorization");
 

@@ -9,6 +9,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -21,6 +23,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private static final Logger logger= LoggerFactory.getLogger(CustomOAuth2SuccessHandler.class);
 
     public CustomOAuth2SuccessHandler(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
@@ -34,11 +37,16 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             throws IOException {
 
         try {
+            logger.error("Inside CustomOAuth2SuccessHandler");
 
             OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
             String email = oAuth2User.getAttribute("email");
             String name  = oAuth2User.getAttribute("name");
+            logger.error("email From  :: "+oAuth2User.getAttribute("email"));
+
+            logger.error("Inside CustomOAuth2SuccessHandler");
+
 
             // 🔥 find or create user (FIXED)
             UserEntity user = userRepository.findByEmail(email);
@@ -69,20 +77,25 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                     user.getRole().name()
             );
 
-            // 🍪 Cookie
-            Cookie cookie = new Cookie("token", token);
+            Cookie cookie =
+                    new Cookie("token", token);
+
             cookie.setHttpOnly(true);
+
+            cookie.setSecure(false);
+
             cookie.setPath("/");
+
             cookie.setMaxAge(60 * 60);
 
             response.addCookie(cookie);
 
-            // 🚀 redirect
+
             response.sendRedirect("/user/dashboard");
 
         } catch (Exception e) {
             e.printStackTrace(); // 🔥 debug
-            response.sendRedirect("api/login");
+            response.sendRedirect("/api/login");
         }
     }
 }

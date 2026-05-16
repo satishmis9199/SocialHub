@@ -58,9 +58,7 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
-    // =====================================================
-    // LOGIN
-    // =====================================================
+
     @PostMapping("/login")
     public ResponseEntity<?> login(
 
@@ -73,9 +71,7 @@ public class AuthController {
 
         try {
 
-            // =============================================
-            // AUTHENTICATE USER
-            // =============================================
+
             Authentication auth =
 
                     authenticationManager.authenticate(
@@ -95,14 +91,7 @@ public class AuthController {
 
                     (CustomUserDetail) auth.getPrincipal();
 
-            logger.info(
-                    "✅ LOGIN SUCCESS : {}",
-                    user.getUsername()
-            );
 
-            // =============================================
-            // GENERATE JWT
-            // =============================================
             String token =
 
                     jwtUtil.generateToken(
@@ -114,9 +103,7 @@ public class AuthController {
                             user.getRole().name()
                     );
 
-            // =============================================
-            // JWT COOKIE
-            // =============================================
+
             Cookie cookie =
                     new Cookie("token", token);
 
@@ -130,9 +117,7 @@ public class AuthController {
 
             response.addCookie(cookie);
 
-            // =============================================
-            // REDIRECT URL
-            // =============================================
+
             String redirectUrl =
                     request.getParameter("continue");
 
@@ -145,14 +130,9 @@ public class AuthController {
                         "/user/dashboard";
             }
 
-            logger.info(
-                    "➡️ REDIRECT URL : {}",
-                    redirectUrl
-            );
 
-            // =============================================
-            // RESPONSE
-            // =============================================
+
+
             return ResponseEntity.ok(
 
                     Map.of(
@@ -189,9 +169,7 @@ public class AuthController {
         }
     }
 
-    // =====================================================
-    // LOGOUT
-    // =====================================================
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
 
@@ -266,9 +244,6 @@ public class AuthController {
                 "0"
         );
 
-        // =============================================
-        // RESPONSE
-        // =============================================
         return ResponseEntity.ok(
 
                 Map.of(

@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -280,13 +281,39 @@ public class PostService {
             throw new RuntimeException(e.getMessage());
         }
     }
-    public UserEntity getLoggedInUser(){
+    public UserEntity getLoggedInUser() {
 
-        Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-        CustomUserDetail user=(CustomUserDetail) authentication.getPrincipal();
-        return user.getUser();
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (authentication == null ||
+                !authentication.isAuthenticated()) {
+
+            throw new RuntimeException("User not authenticated");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        // JWT / Email login
+        if (principal instanceof CustomUserDetail customUser) {
+            return customUser.getUser();
+        }
+
+        // Google OAuth login
+        if (principal instanceof DefaultOAuth2User oauthUser) {
+
+            String email = oauthUser.getAttribute("email");
+
+            return userRepository.findByEmail(email);
+
+        }
+
+        throw new RuntimeException(
+                "Unsupported principal type : "
+                        + principal.getClass()
+        );
     }
 
     public List<CommentResponseDto> getCommentsByPostId(UUID postId) {

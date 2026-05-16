@@ -51,7 +51,7 @@ public class RegisterRestController {
     }
 
 
-    // ✅ Admin endpoint tracing
+
     @Observed(name = "get-all-users")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
